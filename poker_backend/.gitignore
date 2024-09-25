@@ -1,0 +1,24 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.ruff_cache
+.ipynb_checkpoints
+.mypy_cache
+
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+
+# Code Editor Directory
+.idea
+.vscode
+
