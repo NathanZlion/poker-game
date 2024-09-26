@@ -37,7 +37,6 @@ class HandRepository:
             except:
                 return False
 
-
     def get_hand(self, hand_id: str) -> Hand | None:
         with self.db_Connection.cursor() as cursor:
             cursor.execute(
@@ -51,16 +50,7 @@ class HandRepository:
             if not hand:
                 return None
 
-            return Hand(
-                id=hand[0],
-                has_ended=hand[1],
-                number_of_players=hand[2],
-                small_blind_idx=hand[3],
-                big_blind_idx=hand[4],
-                dealer_idx=hand[5],
-                stack_size=hand[6],
-                big_blind_size=hand[7],
-            )
+            return Hand(id=hand[0], hand_history=hand[1])
 
     def get_hand_history(self, hand_status: Optional[bool]) -> List[Hand]:
         with self.db_Connection.cursor() as cursor:

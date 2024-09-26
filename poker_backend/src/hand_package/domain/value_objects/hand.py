@@ -1,9 +1,8 @@
 from dataclasses import dataclass
+from config.injection import get_game_settings
 
-from config.game import GameSettings
 
-
-@dataclass(frozen=True)
+@dataclass()
 class CreateHand:
-    playerCount: int = GameSettings.PLAYER_COUNT
-    stackSize: int = GameSettings.STACK_SIZE
+    playerCount: int = get_game_settings().PLAYER_COUNT
+    stackSize: int = get_game_settings().STACK_SIZE

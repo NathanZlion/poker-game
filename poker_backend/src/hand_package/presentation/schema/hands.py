@@ -1,16 +1,16 @@
-from dataclasses import Field, field
+from dataclasses import field
 from typing import List
 from pydantic import BaseModel
 from config.game import GameSettings
+from config.injection import get_game_settings
 
 
 class CreateHandModel(BaseModel):
-    playerCount: int = Field(  # type: ignore
-        default=GameSettings.PLAYER_COUNT,
-        default_factory=lambda: GameSettings.PLAYER_COUNT,
+    playerCount: int = field(
+        default=get_game_settings().PLAYER_COUNT,
     )
-    stackSize: int = Field(  # type: ignore
-        int,
+    stackSize: int = field(
+        default=get_game_settings().STACK_SIZE,
     )
 
 

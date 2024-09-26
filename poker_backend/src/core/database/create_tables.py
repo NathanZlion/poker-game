@@ -1,4 +1,4 @@
-from core.database.database import getDatabaseConnection
+from src.core.database.database import getDatabaseConnection
 
 
 def create_tables():
@@ -6,31 +6,20 @@ def create_tables():
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     """
 
-    create_game_state_table = """
-        CREATE TABLE IF NOT EXISTS game_state (
-            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-            game_state JSONB
-        )
-    """
 
-    create_game_history_table = """
-        CREATE TABLE IF NOT EXISTS game_history (
+    create_hand_table = """
+        CREATE TABLE IF NOT EXISTS hands (
             id SERIAL PRIMARY KEY,
-            hand_id VARCHAR(255),
-            stack INT,
-            dealer VARCHAR(255),
-            small_blind VARCHAR(255),
-            big_blind VARCHAR(255),
-            hands VARCHAR(255),
-            actions VARCHAR(255),
-            winnings VARCHAR(255)
+            hand_history TEXT NOT NULL
         );
     """
 
-    with getDatabaseConnection() as conn: # type: ignore
-        with conn.cursor() as cursor:
-            cursor.execute(create_extension_uuid)
-            cursor.execute(create_game_state_table)
-            cursor.execute(create_game_history_table)
 
-        conn.commit()
+    print("Creating Tables.......")
+    connection = getDatabaseConnection()
+    with connection.cursor() as cursor:
+        cursor.execute(create_extension_uuid)
+        cursor.execute(create_hand_table)
+
+    print("Tables created successfully.")
+    connection.commit()

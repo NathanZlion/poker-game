@@ -1,10 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from src.core.database.create_tables import create_tables
+from src.core.database.database import getDatabaseConnection
 from src.models import Healthy
 from src.hand_package.presentation.routes.route import hand_router
 from config.settings import allowed_origins, version
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    create_tables()
+    yield
+    conn = getDatabaseConnection()
+    if conn:
+        conn.close()
+        print("--> Database connection closed on app shutdown.")
+
+app = FastAPI(lifespan=lifespan)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,7 +29,7 @@ app.add_middleware(
 
 
 @app.get(f"/api/v{version}")
-async def root():
+async def check_health():
     return Healthy()
 
 
@@ -24,3 +37,4 @@ app.include_router(
     hand_router,
     prefix=f"/api/v{version}",
 )
+
