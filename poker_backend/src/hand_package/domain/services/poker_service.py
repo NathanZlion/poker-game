@@ -1,7 +1,7 @@
 import io
 from typing import List, Tuple
 from src.hand_package.domain.entities.hand import Hand
-from src.hand_package.domain.value_objects.action import Action, ActionObject, ActionType
+from src.hand_package.domain.value_objects.action import Action, ActionType
 from src.hand_package.domain.value_objects.hand import CreateHand
 from pokerkit import Automation, NoLimitTexasHoldem, State, Mode, HandHistory
 
@@ -59,10 +59,6 @@ class PokerService:
 
         # check if the action can be performed
         if not self.__can_perform_action(action, hand):
-
-            print(logs)
-            print(final_state.payoffs)
-
             return ActionResponse(
                 id=hand.id,
                 success=False,
@@ -98,11 +94,6 @@ class PokerService:
         allowed_actions, logs, game_has_ended, total_pot_size = self.analyse_hand(hand)
         hand.game_has_ended = game_has_ended
 
-        print("________________ IN PERFORM ACTION ON HAND __________________")
-        print("Action performed: ", action.type)
-        print(self.formatState(final_state))
-
-
         return ActionResponse(
             id=hand.id,
             success=True,
@@ -132,10 +123,6 @@ class PokerService:
         for index, cards in enumerate(state_after_hole_dealing.hole_cards):
             logs.append(f"Player {index + 1} is dealt {cards}")
 
-        # for state, action in hand_history.state_actions:
-        #     print(self.formatState(state))
-        #     print(action)
-
         # ----
         logs.append("---")
 
@@ -148,8 +135,6 @@ class PokerService:
         big_blind = blinds.pop()
         small_blind = blinds.pop()
 
-        # small_blind, big_blind, _ = state_after_hole_dealing.blinds_or_straddles
-
         # announcing dealers and blind bets
         logs.append(f"{dealer} is the dealer.")
         logs.append(f"{small_blind_dealer} posts small blind - {small_blind} chips")
@@ -157,7 +142,6 @@ class PokerService:
 
         logs.append("---")
 
-        print(actions)
         for index in range(player_count, len(actions)):
             action_log = actions[index]
 
@@ -208,8 +192,8 @@ class PokerService:
         final_state = states[-1]
         allowed_actions = self.__get_allowed_actions(final_state)
         game_has_end = not (final_state.can_deal_board() or  final_state.actor_index is not None)
-        print("__ GAME HAS ENDED __", game_has_end)
         return allowed_actions, logs, game_has_end, final_state.total_pot_amount
+
 
     def __get_allowed_actions(self, state: State) -> List[ActionType]:
         allowed_actions = []
@@ -230,15 +214,18 @@ class PokerService:
 
         return allowed_actions
 
+
     def __get_dealing_round_name(self, state: State) -> str:
         rounds = ["Flop", "Turn", "River"]
         board_cards = list(state.get_board_cards(0))
 
         return rounds[len(board_cards) - 3]
 
+
     def __bets_placed_before(self, state: State) -> bool:
         # at least one non zero bet
         return any(state.bets)
+
 
     def __can_perform_action(self, action: Action, hand: Hand) -> bool:
         final_state = [
@@ -257,17 +244,6 @@ class PokerService:
 
         return False
 
-    # def get_allowed_actions(self, hand: Hand) -> List[ActionType]:
-    #     allowed_actions = []
-
-    #     for action_type in ActionType:
-    #         action: Action = Action(
-    #             hand_id=hand.id, type=action_type, amount=0, description=""
-    #         )
-    #         if self.__can_perform_action(action, hand):
-    #             allowed_actions.append(action_type)
-
-    #     return allowed_actions
 
     def __dump_hand_history(self, state: State) -> str:
         game : NoLimitTexasHoldem = NoLimitTexasHoldem(
@@ -291,7 +267,6 @@ class PokerService:
         )
 
         hand_history = HandHistory.from_game_state(game, state)
-        print("_DUMP HISTORY", hand_history.actions)
         hand_history.players = [f"Player {i+1}" for i in range(state.player_count)]
         buffer = io.BytesIO()
         hand_history.dump(buffer)
@@ -316,9 +291,3 @@ class PokerService:
         res.append(f"Status : {state.status}\n")
 
         return "".join(res)
-
-    # def __get_history_from_hand_history(self, hand_history: HandHistory) -> str:
-    #     buffer = io.BytesIO()
-    #     hand_history.dump(buffer)
-    #     game_str = buffer.getvalue().decode('utf-8')
-    #     return game_str

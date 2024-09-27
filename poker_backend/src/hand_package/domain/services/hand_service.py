@@ -52,11 +52,9 @@ class HandService:
                 pot_amount=-1,
             )
 
-        print("______ PERFORM ACTION CALLED BY HAND SERVICE______")
         action_response, updated_hand = self.poker_service.perform_action_on_hand(action, hand)
 
         allowed_actions, logs, _, _ = self.poker_service.analyse_hand(updated_hand)
-        print(allowed_actions, logs)
 
         # action cannot be performed
         if not action_response.success:
