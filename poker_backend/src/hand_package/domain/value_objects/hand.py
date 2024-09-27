@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from config.injection import get_game_settings
 
-# from injection import get_game_settings
 
 @dataclass()
 class CreateHand:

@@ -7,9 +7,11 @@ from src.hand_package.domain.value_objects.action import Action
 from src.hand_package.domain.services.poker_service import PokerService
 from src.hand_package.presentation.schema.action import ActionModel
 from src.hand_package.presentation.schema.hands import CreateHandModel, HandResponse
+from src.hand_package.presentation.schema.action import ActionResponse
 
 
 class HandService:
+
     def __init__(self, hand_repository: HandRepository, poker_service: PokerService):
         self.hand_repository = hand_repository
         self.poker_service = poker_service
@@ -27,31 +29,42 @@ class HandService:
 
         return HandResponse(
             id=hand.id,
+            message="Hand created successfully.",
             allowed_actions=allowed_actions,
             game_has_ended=game_has_ended,
             logs=logs,
             pot_amount=total_pot_size,
         )
 
-    def perform_action(self, actionModel: ActionModel) -> ActionObject:
+    def perform_action(self, hand_id: str, actionModel: ActionModel) -> ActionResponse:
         action: Action = Action(**actionModel.model_dump())
+        hand = self.hand_repository.get_hand(hand_id)
 
-        hand = self.hand_repository.get_hand(action.hand_id)
-
+        # No such action
         if not hand:
-            return ActionObject(success=False, message="Hand with such id doesn't exist.")
+            return ActionResponse(
+                id="-1",
+                success=False,
+                message="Hand with such id doesn't exist.",
+                logs=[],
+                allowed_moves=[],
+                game_has_ended=False,
+                pot_amount=-1,
+            )
 
-        return self.poker_service.perform_action_on_hand(action, hand)
-        # success, updated_hand = self.poker_service.perform_action_on_hand(action, hand)
+        print("______ PERFORM ACTION CALLED BY HAND SERVICE______")
+        action_response, updated_hand = self.poker_service.perform_action_on_hand(action, hand)
 
-        # if not success:
-        #     return ActionObject(success=False)
+        allowed_actions, logs, _, _ = self.poker_service.analyse_hand(updated_hand)
+        print(allowed_actions, logs)
 
-        # repository_response  = self.hand_repository.update_hand(updated_hand)
+        # action cannot be performed
+        if not action_response.success:
+            return action_response
 
-        # return ActionObject(
-        #     success=repository_response,
-        # )
+        self.hand_repository.update_hand(updated_hand)
+
+        return action_response
 
     def get_hand(self, hand_id: str) -> Hand | None:
         return self.hand_repository.get_hand(hand_id)

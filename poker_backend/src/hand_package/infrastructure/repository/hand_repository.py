@@ -37,23 +37,23 @@ class HandRepository:
                 hand_history=hand.hand_history,
             )
 
-    def get_hand(self, hand_id: str) -> Hand:
+    def get_hand(self, hand_id: str) -> Hand | None:
         with self.db_Connection.cursor() as cursor:
             cursor.execute(
                 """
                     SELECT * FROM hands WHERE id = %s;
                 """,
-                (hand_id)
+                (hand_id,),
             )
 
-            hand = cursor.fetchone()
-            if not hand:
-                raise ValueError("Hand with such id doesn't exist.")
+            fetched_hand = cursor.fetchone()
+            if not fetched_hand:
+                return None
 
             return Hand(
-                id=hand[0],
-                game_has_ended=hand[1],
-                hand_history=hand[2],
+                id=fetched_hand[0],
+                game_has_ended=fetched_hand[1],
+                hand_history=fetched_hand[2],
             )
 
     def get_hand_history(self, hand_status: Optional[bool]) -> List[Hand]:
@@ -95,6 +95,7 @@ class HandRepository:
                         hand.id,
                     ),
                 )
+            self.db_Connection.commit()
             return hand
         except:
             raise ValueError("Hand was not updated.")

@@ -24,7 +24,6 @@ class ActionObject:
 
 @dataclass(frozen=True)
 class Action:
-    hand_id: str
     amount: int
     description: str
     type: ActionType

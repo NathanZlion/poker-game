@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Sequence
+from typing import List
 from pydantic import BaseModel
 
 
@@ -24,17 +24,28 @@ class ActionType(str, Enum):
 
 
 class ActionModel(BaseModel):
-    hand_id : str
-    amount : int
-    description : str
     type : ActionType
-
+    amount : int = 0
+    description : str = "Action to perform."
 
 
 class ActionResponse(BaseModel):
+    """ActionResponse schema
+
+    Attributes:
+        id: str, the id of the hand
+        success: bool, whether the action was successful or not
+        message: str, the message of the action
+        allowed_moves: List[ActionType], the allowed actions for the player who is going to make the next move
+        logs: List[str], the logs of the actions that have been performed in the hand
+        game_has_ended: bool, whether the game has ended or not
+        pot_amount: int, the total pot amount in the hand
+
+    """
+    id: str = ""
     success: bool = False
     message: str = ""
     allowed_moves: List[ActionType] = []
-    game_has_ended: bool = False
     logs: List[str]
+    game_has_ended: bool = False
     pot_amount: int

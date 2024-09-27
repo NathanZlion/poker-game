@@ -31,10 +31,10 @@ class HandResponse(BaseModel):
 
     id: str
     allowed_actions: List[ActionType]
+    message: str
     logs: List[str]
     game_has_ended: bool
     pot_amount: int
-
 
 class GetHandRequest(BaseModel):
     pass

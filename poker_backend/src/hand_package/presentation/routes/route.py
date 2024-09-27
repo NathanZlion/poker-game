@@ -27,8 +27,7 @@ def create_hand(
 
     Returns a HandResponse
     """
-    create_hand_response = hand_service.create_hand(hand_data)
-    return create_hand_response
+    return hand_service.create_hand(hand_data)
 
 
 @hand_router.get(
@@ -71,21 +70,20 @@ def get_hand_history(
 
 
 @hand_router.post(
-    "hands/{hand_id}/actions",
+    "/hands/{hand_id}/actions",
     response_model=ActionResponse,
     response_description="The result of the action performed.",
 )
 def perform_action(
+    hand_id: str,
     action: ActionModel,
     hand_service: HandService = Depends(get_hand_service),
-) -> Optional[ActionResponse]:
+) -> ActionResponse:
     """Perform an action on the hand."""
 
-    result = hand_service.perform_action(action)
-    action_response: ActionResponse = ActionResponse()  # type: ignore
+    result = hand_service.perform_action(hand_id, action)
+    if not result.success:
+        raise HTTPException(status_code=400, detail=result.message)
+        
 
-    # the action failed, or not allowed
-    if not action_response.success:
-        raise HTTPException(status_code=400, detail=action_response.message)
-
-    return action_response
+    return result
