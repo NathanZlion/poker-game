@@ -6,10 +6,10 @@ def create_tables():
         CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
     """
 
-
     create_hand_table = """
         CREATE TABLE IF NOT EXISTS hands (
-            id SERIAL PRIMARY KEY,
+            id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            game_has_ended  BOOLEAN NOT NULL DEFAULT FALSE,
             hand_history TEXT NOT NULL
         );
     """
