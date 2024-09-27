@@ -4,9 +4,9 @@ from src.hand_package.infrastructure.repository.hand_repository import HandRepos
 from src.hand_package.domain.entities.hand import Hand
 from src.hand_package.domain.value_objects.hand import CreateHand
 from src.hand_package.domain.value_objects.action import Action
-from src.hand_package.infrastructure.services.poker_service import PokerService
+from src.hand_package.domain.services.poker_service import PokerService
 from src.hand_package.presentation.schema.action import ActionModel
-from src.hand_package.presentation.schema.hands import CreateHandModel
+from src.hand_package.presentation.schema.hands import CreateHandModel, HandResponse
 
 
 class HandService:
@@ -14,16 +14,24 @@ class HandService:
         self.hand_repository = hand_repository
         self.poker_service = poker_service
 
-    def create_hand(self, create_hand_model: CreateHandModel) -> Optional[Hand]:
+    def create_hand(self, create_hand_model: CreateHandModel) -> HandResponse:
         # convert the model into a value object
         create_hand_value_object: CreateHand = CreateHand(
             **create_hand_model.model_dump()
         )
-        hand: Hand = self.poker_service.create_hand(create_hand_value_object)
 
-        success = self.hand_repository.create_hand(hand)
-        if success:
-            return hand
+        hand: Hand = self.poker_service.create_hand(create_hand_value_object)
+        hand = self.hand_repository.create_hand(hand)
+
+        allowed_actions, logs, game_has_ended, total_pot_size = self.poker_service.analyse_hand(hand)
+
+        return HandResponse(
+            id=hand.id,
+            allowed_actions=allowed_actions,
+            game_has_ended=game_has_ended,
+            logs=logs,
+            pot_amount=total_pot_size,
+        )
 
     def perform_action(self, actionModel: ActionModel) -> ActionObject:
         action: Action = Action(**actionModel.model_dump())

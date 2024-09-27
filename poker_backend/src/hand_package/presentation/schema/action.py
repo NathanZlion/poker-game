@@ -1,6 +1,5 @@
-from dataclasses import Field
 from enum import Enum
-from typing import Sequence
+from typing import List, Sequence
 from pydantic import BaseModel
 
 
@@ -31,18 +30,11 @@ class ActionModel(BaseModel):
     type : ActionType
 
 
-class DealtCards(BaseModel):
-    street_name: str
-    card_string: str
-
 
 class ActionResponse(BaseModel):
     success: bool = False
     message: str = ""
-    next_actor: int | None = None
-    current_actor: int | None = None
-    possible_moves: Sequence[ActionType] = []
-    maximum_bet: int = 0
+    allowed_moves: List[ActionType] = []
     game_has_ended: bool = False
-    dealt_cards: Sequence[DealtCards] = []
-    pot_amount: int = 0
+    logs: List[str]
+    pot_amount: int

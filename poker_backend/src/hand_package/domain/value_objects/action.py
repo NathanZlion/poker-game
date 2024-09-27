@@ -1,17 +1,15 @@
 from dataclasses import dataclass
-from enum import Enum
-from typing import Sequence
-from src.hand_package.presentation.schema.action import DealtCards as DealtCardsModel
+# from enum import Enum
+from src.hand_package.presentation.schema.action import ActionType
 
-
-@dataclass(frozen=True)
-class ActionType(str, Enum):
-    FOLD  = "FOLD"
-    CHECK = "CHECK"
-    CALL = "CALL"
-    BET = "BET"
-    RAISE = "RAISE"
-    ALLIN = "ALL_IN"
+# @dataclass(frozen=True)
+# class ActionType(str, Enum):
+#     FOLD = "FOLD"
+#     CHECK = "CHECK" 
+#     CALL = "CALL"
+#     BET = "BET"
+#     RAISE = "RAISE"
+#     ALLIN = "ALL_IN"
 
 @dataclass(frozen=True)
 class ActionObject:

@@ -1,16 +1,15 @@
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
 class Hand:
-    """
-    Hand entity
+    """ Hand entity
 
-    Attributes:
-    - id: str
-    - hand_history: str
+        Attributes:
+            id: str, the id of the hand
+            game_has_ended: bool, whether the game has ended or not
+            hand_history: str, the history of the hand serialized as a string
     """
-    id: str = ""
-    hand_history: str = field(default_factory=str)
-
+    game_has_ended: bool
+    hand_history: str
+    id: str = field(default="")

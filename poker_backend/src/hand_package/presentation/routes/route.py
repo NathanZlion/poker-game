@@ -1,8 +1,8 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
+from injection import get_hand_service
 from src.hand_package.domain.entities.hand import Hand
-from src.hand_package.infrastructure.injection import get_hand_service
-from src.hand_package.infrastructure.services.hand_service import HandService
+from src.hand_package.domain.services.hand_service import HandService
 from src.hand_package.presentation.schema.action import ActionModel, ActionResponse
 from src.hand_package.presentation.schema.hands import (
     CreateHandModel,
@@ -15,16 +15,18 @@ hand_router = APIRouter()
 
 
 @hand_router.post(
-    "/hands",
+    "/new_hand",
     response_model=HandResponse,
     response_description="The hand that was created.",
 )
-def new_hand(
+def create_hand(
     hand_data: CreateHandModel,
     hand_service: HandService = Depends(get_hand_service),
 ):
-    """Create a new hand, and start the game."""
+    """Create a new hand, and start the game. 
 
+    Returns a HandResponse
+    """
     create_hand_response = hand_service.create_hand(hand_data)
     return create_hand_response
 
@@ -45,14 +47,9 @@ def get_hand_by_id(
     if not hand:
         raise HTTPException(status_code=404, detail="Hand not found.")
 
-    return HandResponse(
-        id=hand.id,
-        has_ended=hand.has_ended,
-        small_blind_idx=hand.small_blind_idx,
-        big_blind_idx=hand.big_blind_idx,
-        dealer_idx=hand.dealer_idx,
-        number_of_players=hand.number_of_players,
-        stack_size=hand.stack_size
+    return HandResponse(  # type: ignore
+        # id=hand.id,
+        # has_ended=hand.has_ended,
     )
 
 
@@ -85,15 +82,7 @@ def perform_action(
     """Perform an action on the hand."""
 
     result = hand_service.perform_action(action)
-    action_response: ActionResponse = ActionResponse(
-        success=result.success,
-        message=result.message,
-        next_actor=result.next_actor,
-        current_actor=result.current_actor,
-        dealt_cards=result.dealt_cards,
-        game_has_ended=result.game_has_ended,
-
-    )
+    action_response: ActionResponse = ActionResponse()  # type: ignore
 
     # the action failed, or not allowed
     if not action_response.success:

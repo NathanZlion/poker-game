@@ -1,30 +1,39 @@
-from dataclasses import field
+# from dataclasses import field
 from typing import List
 from pydantic import BaseModel
-from config.game import GameSettings
 from config.injection import get_game_settings
+from src.hand_package.presentation.schema.action import ActionType
 
 
 class CreateHandModel(BaseModel):
-    playerCount: int = field(
-        default=get_game_settings().PLAYER_COUNT,
-    )
-    stackSize: int = field(
-        default=get_game_settings().STACK_SIZE,
-    )
+    """CreateHandModel schema
+
+    Attributes:
+        player_count: int, the number of players in the game
+        stack_size: int, the stack size for each player during the start of the game
+
+    Default values are taken from the game settings if field is not provided.
+    """
+
+    player_count: int = get_game_settings().PLAYER_COUNT
+    stack_size: int = get_game_settings().STACK_SIZE
 
 
 class HandResponse(BaseModel):
-    id: str = ""
-    has_ended: bool = False
-    number_of_players: int = 6
-    small_blind_idx: int = 3
-    big_blind_idx: int = 4
-    dealer_idx: int = 2
-    stack_size: int = 10000
-    big_blind_size: int = 40
-    players: List[str] = field(default_factory=list)
-    state: str = field(default_factory=str)
+    """HandResponse schema
+
+    Attributes:
+        id: str, the id of the hand
+        allowed_actions: List[ActionType], the allowed actions for the player who is going to make the next move
+        logs: List[str], the logs of the actions that have been performed in the hand
+        game_has_ended: bool, whether the game has ended or not
+    """
+
+    id: str
+    allowed_actions: List[ActionType]
+    logs: List[str]
+    game_has_ended: bool
+    pot_amount: int
 
 
 class GetHandRequest(BaseModel):
@@ -32,4 +41,4 @@ class GetHandRequest(BaseModel):
 
 
 class HandHistoryResponse(BaseModel):
-    hands: List[HandResponse] = field(default_factory=list)
+    hands: List[HandResponse] = []

@@ -4,53 +4,57 @@ from src.hand_package.domain.entities.hand import Hand
 
 
 class HandRepository:
+
     def __init__(self, db_connection: connection):
         self.db_Connection = db_connection
 
-    def create_hand(self, hand: Hand) -> bool:
-        with self.db_Connection.cursor() as cursor:
-            try:
-                cursor.execute(
-                    """
-                        INSERT INTO hands (
-                            has_ended,
-                            number_of_players,
-                            small_blind_idx,
-                            big_blind_idx,
-                            dealer_idx,
-                            stack_size,
-                            big_blind_size
-                        )
-                        VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id;
-                    """,
-                    (
-                        hand.has_ended,
-                        hand.number_of_players,
-                        hand.small_blind_idx,
-                        hand.big_blind_idx,
-                        hand.dealer_idx,
-                        hand.stack_size,
-                        hand.big_blind_size,
-                    ),
-                )
-                return True
-            except:
-                return False
+    def create_hand(self, hand: Hand) -> Hand:
 
-    def get_hand(self, hand_id: str) -> Hand | None:
+        with self.db_Connection.cursor() as cursor:
+            cursor.execute(
+                """
+                    INSERT INTO hands (
+                        game_has_ended,
+                        hand_history
+                    )
+                    VALUES (%s, %s) RETURNING id;
+                """,
+                (
+                    hand.game_has_ended,
+                    hand.hand_history
+                ),
+            )
+
+            self.db_Connection.commit()
+            created_hand = cursor.fetchone()
+
+            if created_hand is None:
+                raise ValueError("Hand was not created.")
+
+            return Hand(
+                id=created_hand[0],
+                game_has_ended=hand.game_has_ended,
+                hand_history=hand.hand_history,
+            )
+
+    def get_hand(self, hand_id: str) -> Hand:
         with self.db_Connection.cursor() as cursor:
             cursor.execute(
                 """
                     SELECT * FROM hands WHERE id = %s;
                 """,
-                (hand_id,),
+                (hand_id)
             )
 
             hand = cursor.fetchone()
             if not hand:
-                return None
+                raise ValueError("Hand with such id doesn't exist.")
 
-            return Hand(id=hand[0], hand_history=hand[1])
+            return Hand(
+                id=hand[0],
+                game_has_ended=hand[1],
+                hand_history=hand[2],
+            )
 
     def get_hand_history(self, hand_status: Optional[bool]) -> List[Hand]:
         with self.db_Connection.cursor() as cursor:
@@ -59,7 +63,6 @@ class HandRepository:
                     """
                         SELECT * FROM hands
                         WHERE has_ended = %s;
-                        ;
                     """,
                     (hand_status), # type: ignore
                 )
@@ -72,45 +75,26 @@ class HandRepository:
 
             hands = cursor.fetchall()
             return [
-                Hand(
-                    id=hand[0],
-                    has_ended=hand[1],
-                    number_of_players=hand[2],
-                    small_blind_idx=hand[3],
-                    big_blind_idx=hand[4],
-                    dealer_idx=hand[5],
-                    stack_size=hand[6],
-                    big_blind_size=hand[7],
-                )
+                Hand(id=hand[0], game_has_ended=hand[1], hand_history=hand[2])
                 for hand in hands
             ]
 
-    def update_hand(self, hand: Hand) -> bool:
+    def update_hand(self, hand: Hand) -> Hand:
         try:
             with self.db_Connection.cursor() as cursor:
                 cursor.execute(
                     """
                         UPDATE hands
-                        SET has_ended = %s,
-                            number_of_players = %s,
-                            small_blind_idx = %s,
-                            big_blind_idx = %s,
-                            dealer_idx = %s,
-                            stack_size = %s,
-                            big_blind_size = %s
+                        SET game_has_ended = %s,
+                            hand_history = %s
                         WHERE id = %s;
                     """,
                     (
-                        hand.has_ended,
-                        hand.number_of_players,
-                        hand.small_blind_idx,
-                        hand.big_blind_idx,
-                        hand.dealer_idx,
-                        hand.stack_size,
-                        hand.big_blind_size,
+                        hand.game_has_ended,
+                        hand.hand_history,
                         hand.id,
                     ),
                 )
-            return True
+            return hand
         except:
-            return False
+            raise ValueError("Hand was not updated.")
