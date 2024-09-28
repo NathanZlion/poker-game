@@ -2,31 +2,70 @@
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { IoReload } from "react-icons/io5";
+import { fetchHandHistory } from "@/lib/feature/handHistory/handHistorySlice";
+
 
 export default function HandHistory(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
     
     const dispatch = useAppDispatch();
-    const { loading } = useAppSelector((state) => state.history);
+    const { loading, value : handHistories } = useAppSelector((state) => state.history);
 
     return (
-        <div className={cn("bg-secondary p-4", className)}>
+        <div className={cn("bg-secondary p-4 relative", className)}>
+
+            {/* loading indicatior bar at the top */}
             <div
-                className="animate-pulse bg-blue-600 sticky top-0"
-                style={{ height: ".4rem", display: loading ? "block" : "none" }}
-            ></div>
+                className={cn(
+                    "absolute top-0 left-0 w-full h-1 bg-blue-400 animate-pulse",
+                    loading == "pending" ? "block" : "hidden"
+                )}
+            >
+            </div>
+
+            <div className="flex justify-end">
+                <Button
+                    className="ms-auto"
+                    variant={"ghost"}
+                    onClick={() => dispatch(fetchHandHistory())}
+                >
+                    < IoReload />
+                </Button>
+            </div>
 
             <div className="text-xl px-2"> Hand History</div>
 
-            <div className="flex flex-col gap-3 p-3 ">
-                <div className="container p-3 bg-blue-200 dark:bg-blue-800">
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                    est ducimus illo, ipsum similique aliquid iusto minima
-                    unde omnis ut adipisci amet molestiae tempora perspiciatis
-                    voluptatibus fuga aperiam? Animi, laboriosam dolore
-                    minus, fugit perspiciatis hic vitae id unde doloremque enim!
-                </div>
-            </div>
+            {
+                handHistories.map((handHistory, index) => (
+                    <div key={index} className="flex flex-col gap-3 p-3 ">
+                        <div className="container p-3 bg-blue-200 dark:bg-blue-800">
+                            <p> Hand #{handHistory.id}</p>
+                            <p> Stack: {handHistory.stack}; Dealer: {handHistory.dealer}; Big Blind: {handHistory.big_blind_player}; Small Blind: {handHistory.small_blind_player} </p>
+                            <p> Hands : {
+                                Object.entries(handHistory.hands).map((
+                                    [player, hand]
+                                ) => {
+                                    return `${player}: ${hand}; `
+                                })
+                            }
+                            </p>
+                            <p>Actions: {handHistory.actions}</p>
+                            <p> Winnings : {
+                                Object.entries(handHistory.winnings).map((
+                                    [player, winning]
+                                ) => {
+                                    // Ensure the winning has a sign infront of it
+                                    const formattedWinning = winning > 0 ? `+${winning}` : `${winning}`;
+                                    return `${player}: ${formattedWinning}; `
+                                })
+                            }
+                            </p>
+                        </div>
+                    </div>
+                ))
+            }
         </div>
     );
 }
