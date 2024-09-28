@@ -39,6 +39,25 @@ class HandResponse(BaseModel):
 class GetHandRequest(BaseModel):
     pass
 
-
 class HandHistoryResponse(BaseModel):
-    hands: List[HandResponse] = []
+    """HandHistoryResponse schema
+
+    Attributes:
+        id: str, the id of the hand
+        stack: int, the stack of the player
+        dealer: str, the dealer of the hand
+        small_blind_player: str, the small blind player
+        big_blind_player: str, the big blind player
+        actions: str, the actions that have been performed in the hand
+        hands: dict[str, str], the hands of the players
+        winnings: dict[str, int], the winnings of the players
+    """
+
+    id : str
+    stack : int
+    dealer : str
+    small_blind_player : str
+    big_blind_player : str
+    actions: str
+    hands: dict[str, str]
+    winnings : dict[str, int]

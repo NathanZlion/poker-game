@@ -62,9 +62,9 @@ class HandRepository:
                 cursor.execute(
                     """
                         SELECT * FROM hands
-                        WHERE has_ended = %s;
+                        WHERE game_has_ended = %s;
                     """,
-                    (hand_status), # type: ignore
+                    (hand_status,), # type: ignore
                 )
             else:
                 cursor.execute(

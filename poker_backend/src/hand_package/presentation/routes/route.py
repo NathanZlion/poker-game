@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from injection import get_hand_service
 from src.hand_package.domain.entities.hand import Hand
 from src.hand_package.domain.services.hand_service import HandService
@@ -31,8 +31,8 @@ def create_hand(
 
 
 @hand_router.get(
-    "hands/{hand_id}",
-    response_model=HandResponse,
+    "/hands/{hand_id}",
+    response_model=HandHistoryResponse,
 )
 def get_hand_by_id(
     hand_id: str,
@@ -52,16 +52,13 @@ def get_hand_by_id(
     )
 
 
-@hand_router.get("hands", response_model=HandHistoryResponse)
+@hand_router.get("/hands", response_model=List[HandHistoryResponse])
 def get_hand_history(
-    completed: bool = True,
     hand_service: HandService = Depends(get_hand_service),
 ):
     """Get's hand history, all hands that have ended."""
 
-    hands: List[Hand] = hand_service.get_hand_history(
-        hand_status=completed
-    )
+    hands: List[HandHistoryResponse] = hand_service.get_hand_history()
 
     if hands:
         return hands

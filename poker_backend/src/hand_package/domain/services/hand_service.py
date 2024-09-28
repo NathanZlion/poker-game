@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from src.hand_package.domain.value_objects.action import ActionObject
 from src.hand_package.infrastructure.repository.hand_repository import HandRepository
 from src.hand_package.domain.entities.hand import Hand
@@ -6,7 +6,7 @@ from src.hand_package.domain.value_objects.hand import CreateHand
 from src.hand_package.domain.value_objects.action import Action
 from src.hand_package.domain.services.poker_service import PokerService
 from src.hand_package.presentation.schema.action import ActionModel
-from src.hand_package.presentation.schema.hands import CreateHandModel, HandResponse
+from src.hand_package.presentation.schema.hands import CreateHandModel, HandHistoryResponse, HandResponse
 from src.hand_package.presentation.schema.action import ActionResponse
 
 
@@ -53,8 +53,7 @@ class HandService:
             )
 
         action_response, updated_hand = self.poker_service.perform_action_on_hand(action, hand)
-
-        allowed_actions, logs, _, _ = self.poker_service.analyse_hand(updated_hand)
+        _, _, _, _ = self.poker_service.analyse_hand(updated_hand)
 
         # action cannot be performed
         if not action_response.success:
@@ -67,5 +66,14 @@ class HandService:
     def get_hand(self, hand_id: str) -> Hand | None:
         return self.hand_repository.get_hand(hand_id)
 
-    def get_hand_history(self, hand_status: Optional[bool]) -> list[Hand]:
-        return self.hand_repository.get_hand_history(hand_status=hand_status)
+    def get_hand_history(
+        self, completed: Optional[bool] = True
+    ) -> list[HandHistoryResponse]:
+        hands : List[Hand] = self.hand_repository.get_hand_history(hand_status=completed)
+
+        handhistories : List[HandHistoryResponse] = [
+            self.poker_service.get_formatted_hand_history(hand)
+            for hand in hands
+        ]
+
+        return handhistories

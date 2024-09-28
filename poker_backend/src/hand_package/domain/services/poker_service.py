@@ -6,6 +6,7 @@ from src.hand_package.domain.value_objects.hand import CreateHand
 from pokerkit import Automation, NoLimitTexasHoldem, State, Mode, HandHistory
 
 from src.hand_package.presentation.schema.action import ActionResponse
+from src.hand_package.presentation.schema.hands import HandHistoryResponse
 
 
 class PokerService:
@@ -45,6 +46,7 @@ class PokerService:
     def perform_action_on_hand(self, action: Action, hand: Hand) -> Tuple[ActionResponse, Hand]:
         allowed_actions, logs, game_has_ended, total_pot_size = self.analyse_hand(hand)
         hand_history = self.__load_hand_history(hand)
+
         final_state = [state for state, _ in hand_history.state_actions ][-1]
 
         if game_has_ended:
@@ -83,15 +85,26 @@ class PokerService:
         hand.hand_history = updated_hand_history
         allowed_actions, logs, game_has_ended, total_pot_size = self.analyse_hand(hand)
         hand.game_has_ended = game_has_ended
+        total_pot_size = final_state.total_pot_amount
+        
+        if game_has_ended:
+            while final_state.status and final_state.can_show_or_muck_hole_cards():
+                final_state.show_or_muck_hole_cards()
+
+        updated_hand_history = self.__dump_hand_history(final_state)
+        hand.hand_history = updated_hand_history
+        allowed_actions, logs, game_has_ended, _ = self.analyse_hand(hand)
+        hand.game_has_ended = game_has_ended
 
         hand_history = self.__load_hand_history(hand)
         final_state = [state for state, _ in hand_history.state_actions ][-1]
         if final_state.can_deal_board():
             final_state.deal_board()
+        
 
         updated_hand_history = self.__dump_hand_history(final_state)
         hand.hand_history = updated_hand_history
-        allowed_actions, logs, game_has_ended, total_pot_size = self.analyse_hand(hand)
+        allowed_actions, logs, game_has_ended, _ = self.analyse_hand(hand)
         hand.game_has_ended = game_has_ended
 
         return ActionResponse(
@@ -194,7 +207,6 @@ class PokerService:
         game_has_end = not (final_state.can_deal_board() or  final_state.actor_index is not None)
         return allowed_actions, logs, game_has_end, final_state.total_pot_amount
 
-
     def __get_allowed_actions(self, state: State) -> List[ActionType]:
         allowed_actions = []
 
@@ -214,6 +226,107 @@ class PokerService:
 
         return allowed_actions
 
+    def get_formatted_hand_history(self, hand: Hand) -> HandHistoryResponse:
+        hand_history : HandHistory= self.__load_hand_history(hand)
+        stack = hand_history.starting_stacks[0]
+        players = hand_history.players
+        states = [state for state, _ in hand_history.state_actions]
+        player_count = len(players) # type: ignore
+        actions = hand_history.actions
+        """
+        ['d dh p1 TdJh', 'd dh p2 As6h', 'd dh p3 7dTh', 'd dh p4 3s9d', 'd dh p5 JsTs', 'd dh p6 5c6d']
+        """
+        print(len(actions), len(states))
+
+        for index, state in enumerate(states):
+            print(f"State {index} - {actions[index-1]}")
+            print(self.formatState(state))
+            print("\n")
+
+        # log of the hole dealing
+        state_after_hole_dealing = states[player_count]
+
+        self.formatState(state_after_hole_dealing)
+
+        dealer_index = -1
+        dealer_player = players[dealer_index]  # type: ignore
+        small_blind_dealer = players[(dealer_index + 1) % player_count]  # type: ignore
+        big_blind_dealer = players[(dealer_index + 2) % player_count]  # type: ignore
+
+        final_state = states[-1]
+
+
+        hands = {
+            f"Player {index + 1}": f"{action.split()[3]}"
+            for index, action in enumerate(actions[:player_count])
+        }
+
+        winnings = {
+            f"Player {index + 1}" : winning
+        for index, winning in enumerate(final_state.payoffs)
+        }
+
+        actions = self.__get_formatted_hh_actions(hand)
+        print(final_state.stacks)
+
+        return HandHistoryResponse(
+            id=hand.id,
+            stack=stack,
+            actions=actions,
+            big_blind_player=big_blind_dealer,
+            small_blind_player=small_blind_dealer,
+            dealer=dealer_player,
+            hands=hands,
+            winnings=winnings
+        )
+
+    def __get_formatted_hh_actions(self, hand: Hand) -> str:
+        hand_history : HandHistory= self.__load_hand_history(hand)
+        players = hand_history.players
+        states = [state for state, _ in hand_history.state_actions]
+        actions = hand_history.actions
+        player_count = len(players) # type: ignore
+
+        logs = [[]]
+
+        for index in range(player_count, len(actions)):
+            action_log = actions[index]
+
+            if action_log is None:
+                continue
+
+            action_log = action_log.split(" ")
+
+            if len(action_log) == 2:
+                _, action = action_log
+                state = states[index]
+
+                # check or call
+                if action == "cc": 
+                    logs[-1].append("c" if self.__bets_placed_before(state) else "x")
+                # fold
+                elif action == "f":
+                    logs[-1].append("f")
+
+            elif len(action_log) == 3:
+                _, action, _ = action_log
+
+                # deal board : example - < d db 6hTs8s >
+                if action == "db":
+                    _, _, cards = action_log
+                    logs.append([f"{cards}"])
+                    logs.append([])
+
+                # complete bet or raise : example - < p1 cbr 2000 >
+                elif action == "cbr":  
+                    _, _, amount = action_log
+
+                    if self.__bets_placed_before(state):
+                        logs[-1].append(f"r{amount}")
+                    else:
+                        logs[-1].append(f"b{amount}")
+
+        return " ".join([":".join(log) for log in logs])
 
     def __get_dealing_round_name(self, state: State) -> str:
         rounds = ["Flop", "Turn", "River"]
@@ -221,11 +334,9 @@ class PokerService:
 
         return rounds[len(board_cards) - 3]
 
-
     def __bets_placed_before(self, state: State) -> bool:
         # at least one non zero bet
         return any(state.bets)
-
 
     def __can_perform_action(self, action: Action, hand: Hand) -> bool:
         final_state = [
@@ -244,10 +355,10 @@ class PokerService:
 
         return False
 
-
     def __dump_hand_history(self, state: State) -> str:
         game : NoLimitTexasHoldem = NoLimitTexasHoldem(
             automations=(
+                Automation.HOLE_CARDS_SHOWING_OR_MUCKING,
                 Automation.BOARD_DEALING,
                 Automation.BLIND_OR_STRADDLE_POSTING,
                 Automation.HOLE_DEALING,
@@ -255,7 +366,6 @@ class PokerService:
                 Automation.BET_COLLECTION,
                 Automation.CHIPS_PUSHING,
                 Automation.CHIPS_PULLING,
-                Automation.HOLE_CARDS_SHOWING_OR_MUCKING,
                 Automation.HAND_KILLING,
                 Automation.CARD_BURNING
             ),  #type: ignore
@@ -278,16 +388,18 @@ class PokerService:
         return HandHistory.load(io.BytesIO(bytes(hand.hand_history, encoding="utf-8")))
 
     def formatState(self, state: State) -> str:
-        res = []
-        res.append(f"Actor_indices: {state.actor_indices}, active player: {state.actor_index}\n")
-        res.append(f"Stacks: {state.stacks}\n")
-        res.append(f"Bets: {state.bets}\n")
-        res.append(f"Total Pot Amount: {state.total_pot_amount}\n")
-        res.append(f"Hole Cards {state.hole_cards}\n")
-        res.append(f"Pot Amounts: {tuple(state.pot_amounts)}\n")
-        res.append(f"Minimum Completion/Raise Betting: {state.min_completion_betting_or_raising_to_amount}\n")
-        res.append(f"Board : {tuple(state.get_board_cards(0))}\n")
-        res.append(f"Can deal : {state.can_deal_board()}\n")
-        res.append(f"Status : {state.status}\n")
+        res = [
+            f"Actor_indices: {state.actor_indices}, active player: {state.actor_index}\n",
+            f"Stacks: {state.stacks}\n",
+            f"Bets: {state.bets}\n",
+            f"Total Pot Amount: {state.total_pot_amount}\n",
+            f"Hole Cards {state.hole_cards}\n",
+            f"Pot Amounts: {tuple(state.pot_amounts)}\n",
+            f"Minimum Completion/Raise Betting: {state.min_completion_betting_or_raising_to_amount}\n",
+            f"Board : {tuple(state.get_board_cards(0))}\n",
+            f"Can deal : {state.can_deal_board()}\n",
+            f"Status : {state.status}\n",
+            f"Winnings {state.payoffs} \n\n\n",
+        ]
 
         return "".join(res)
