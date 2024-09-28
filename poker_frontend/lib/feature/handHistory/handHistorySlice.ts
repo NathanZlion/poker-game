@@ -64,9 +64,7 @@ export const fetchHandHistory = createAsyncThunk<void, void, { state: RootState 
             dispatch(handHistorySlice.actions.setLoading("failed"));
             return;
         }
-
-        console.log(data)
-
+        
         // Update store
         dispatch(handHistorySlice.actions.setValue(data));
 
