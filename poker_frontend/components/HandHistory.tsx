@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { IoReload } from "react-icons/io5";
 import { fetchHandHistory } from "@/lib/feature/handHistory/handHistorySlice";
+import { useEffect } from "react";
 
 
 export default function HandHistory(
@@ -12,6 +13,11 @@ export default function HandHistory(
     
     const dispatch = useAppDispatch();
     const { loading, value : handHistories } = useAppSelector((state) => state.history);
+
+    useEffect(()=>{
+        dispatch(fetchHandHistory());
+    }, []);
+
 
     return (
         <div className={cn("bg-secondary p-4 relative", className)}>
@@ -39,7 +45,7 @@ export default function HandHistory(
 
             {
                 handHistories.map((handHistory, index) => (
-                    <div key={index} className="flex flex-col gap-3 p-3 ">
+                    <div key={index} className={cn("flex flex-col gap-3 p-3", loading == "pending" ? "animate-pulse" : "")}>
                         <div className="container p-3 bg-blue-200 dark:bg-blue-800">
                             <p> Hand #{handHistory.id}</p>
                             <p> Stack: {handHistory.stack}; Dealer: {handHistory.dealer}; Big Blind: {handHistory.big_blind_player}; Small Blind: {handHistory.small_blind_player} </p>
