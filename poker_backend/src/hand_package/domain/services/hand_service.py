@@ -47,7 +47,7 @@ class HandService:
                 success=False,
                 message="Hand with such id doesn't exist.",
                 logs=[],
-                allowed_moves=[],
+                allowed_actions=[],
                 game_has_ended=False,
                 pot_amount=-1,
             )

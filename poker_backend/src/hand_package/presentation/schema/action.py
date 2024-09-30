@@ -36,7 +36,7 @@ class ActionResponse(BaseModel):
         id: str, the id of the hand
         success: bool, whether the action was successful or not
         message: str, the message of the action
-        allowed_moves: List[ActionType], the allowed actions for the player who is going to make the next move
+        allowed_actions: List[ActionType], the allowed actions for the player who is going to make the next move
         logs: List[str], the logs of the actions that have been performed in the hand
         game_has_ended: bool, whether the game has ended or not
         pot_amount: int, the total pot amount in the hand
@@ -45,7 +45,7 @@ class ActionResponse(BaseModel):
     id: str = ""
     success: bool = False
     message: str = ""
-    allowed_moves: List[ActionType] = []
+    allowed_actions: List[ActionType] = []
     logs: List[str]
     game_has_ended: bool = False
     pot_amount: int
