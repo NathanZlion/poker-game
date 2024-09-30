@@ -1,3 +1,4 @@
+import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/lib/apiService';
 import { RootState } from '@/lib/store';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
@@ -33,7 +34,6 @@ export const handHistorySlice = createSlice({
         },
         setValue: (state: HandHistorySliceState, action: PayloadAction<HandHistory[]>) => {
             state.value = action.payload;
-            console.log(action.payload)    
         }
     },
     extraReducers: (builder) => {
@@ -55,16 +55,17 @@ export const fetchHandHistory = createAsyncThunk<void, void, { state: RootState 
         if (getState().history.loading === "pending") {
             return;
         }
-
+        
         dispatch(handHistorySlice.actions.setLoading("pending"));
-
+        
         // Fetch history from server
         const { data, status } = await apiService.get("/hands");
+
         if (status !== 200) {
             dispatch(handHistorySlice.actions.setLoading("failed"));
             return;
         }
-        
+
         // Update store
         dispatch(handHistorySlice.actions.setValue(data));
 

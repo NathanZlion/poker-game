@@ -1,12 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { handHistorySlice } from '@/lib/feature/handHistory/handHistorySlice';
-import { counterSlice } from '@/lib/feature/counter/counterSlice';
 import { handSlice } from '@/lib/feature/hand/handSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      counter: counterSlice.reducer,
       hand: handSlice.reducer,
       history: handHistorySlice.reducer
     }
