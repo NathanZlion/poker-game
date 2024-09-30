@@ -14,6 +14,7 @@ export default function HandHistory(
     const dispatch = useAppDispatch();
     const { loading, value : handHistories } = useAppSelector((state) => state.history);
 
+
     useEffect(()=>{
         dispatch(fetchHandHistory());
     }, []);
