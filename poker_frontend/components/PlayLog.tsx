@@ -3,12 +3,13 @@
 import { useAppSelector } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { ScrollArea } from "./ui/scroll-area";
 
 export default function PlayLog(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
-  const { handId, logs, loading, gameHasEnded, lastPotAmount } = useAppSelector(state => state.hand);
-  const _s = useAppSelector(state => state.hand);
+    const { handId, logs, loading, gameHasEnded, lastPotAmount } = useAppSelector(state => state.hand);
+    const _s = useAppSelector(state => state.hand);
 
     useEffect(() => {
         // Scroll to bottom
@@ -17,10 +18,9 @@ export default function PlayLog(
     }, [_s.logs]);
 
     return (
-        <div className={cn("flex flex-col", className)}>
-
+        <ScrollArea className={cn("", className)}>
             {
-                logs.map((log, index)=>{
+                logs.map((log, index) => {
                     return (
                         <p key={`playlog_${index}`} className="block"> {log} </p>
                     );
@@ -45,6 +45,6 @@ export default function PlayLog(
 
             { /* This is a hack to scroll to bottom of the div whenever there is a new log added */}
             <div id="scroll-to-bottom"></div>
-        </div>
+        </ScrollArea>
     );
 }

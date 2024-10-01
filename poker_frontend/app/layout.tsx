@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col `}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen flex flex-col  border border-red-900 overflow-hidden`}
       >
         <Provider store={storeRef.current}>
           <ThemeProvider
@@ -44,7 +44,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <nav className="flex justify-end p-5 pe-10"> <ThemeToggle /> </nav>
+            {/* <nav className="flex justify-end p-5 pe-10"> <ThemeToggle /> </nav> */}
 
             {children}
           </ThemeProvider>

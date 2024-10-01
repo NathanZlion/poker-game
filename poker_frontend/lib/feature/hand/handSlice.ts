@@ -49,7 +49,8 @@ const initialState : HandSliceState = {
     raiseSize: 40,
     lastPotAmount: 0,
     gameHasEnded: false,
-    logs: []
+    logs: [
+    ]
 };
 
 export const handSlice = createSlice({

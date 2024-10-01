@@ -2,55 +2,32 @@
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { IoReload } from "react-icons/io5";
 import { fetchHandHistory } from "@/lib/feature/handHistory/handHistorySlice";
 import { useEffect } from "react";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 
 export default function HandHistory(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-    
+
     const dispatch = useAppDispatch();
-    const { loading, value : handHistories } = useAppSelector((state) => state.history);
+    const { loading, value: handHistories } = useAppSelector((state) => state.history);
 
-
-    useEffect(()=>{
+    useEffect(() => {
         dispatch(fetchHandHistory());
     }, []);
 
-
     return (
-        <div className={cn("bg-secondary p-4 relative", className)}>
-
-            {/* loading indicatior bar at the top */}
-            <div
-                className={cn(
-                    "absolute top-0 left-0 w-full h-1 bg-blue-400 animate-pulse",
-                    loading == "pending" ? "block" : "hidden"
-                )}
-            >
-            </div>
-
-            <div className="flex justify-end">
-                <Button
-                    className="ms-auto"
-                    variant={"ghost"}
-                    onClick={() => dispatch(fetchHandHistory())}
-                >
-                    < IoReload />
-                </Button>
-            </div>
-
-            <div className="text-xl px-2"> Hand History</div>
-
+        <ScrollArea className={cn("", className) }>
+            
+            {/* the list of histories */}
             {
-                handHistories.map((handHistory, index) => (
-                    <div key={index} className={cn("flex flex-col gap-3 p-3", loading == "pending" ? "animate-pulse" : "")}>
-                        <div className="container p-3 bg-blue-200 dark:bg-blue-800">
-                            <p> Hand #{handHistory.id}</p>
-                            <p> Stack: {handHistory.stack}; Dealer: {handHistory.dealer}; Big Blind: {handHistory.big_blind_player}; Small Blind: {handHistory.small_blind_player} </p>
-                            <p> Hands : {
+                handHistories.map((handHistory, index) => {
+                    return (
+                        <div key={`hand_history_${index}`} className="my-3 bg-blue-200 dark:bg-blue-800 p-4">
+                            <p className="text-wrap"> Hand #{handHistory.id}</p>
+                            <p className="text-wrap"> Stack: {handHistory.stack}; Dealer: {handHistory.dealer}; Big Blind: {handHistory.big_blind_player}; Small Blind: {handHistory.small_blind_player} </p>
+                            <p className="text-wrap"> Hands : {
                                 Object.entries(handHistory.hands).map((
                                     [player, hand]
                                 ) => {
@@ -70,9 +47,9 @@ export default function HandHistory(
                             }
                             </p>
                         </div>
-                    </div>
-                ))
+                    );
+                })
             }
-        </div>
+        </ScrollArea>
     );
 }

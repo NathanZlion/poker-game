@@ -1,4 +1,3 @@
-import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/lib/apiService';
 import { RootState } from '@/lib/store';
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
@@ -7,7 +6,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 export type loadingTypes = "pending" | "idle" | "failed" | "success";
 
 interface HandHistory {
-    id: number;
+    id: string;
     small_blind_player: string;
     stack: number;
     big_blind_player: string;
@@ -22,12 +21,15 @@ interface HandHistorySliceState {
     value: HandHistory[]
 }
 
+
+const initialState: HandHistorySliceState = {
+    loading: 'idle',
+    value: []
+};
+
 export const handHistorySlice = createSlice({
     name: 'counter',
-    initialState: {
-        loading: 'idle',
-        value: []
-    } as HandHistorySliceState,
+    initialState: initialState,
     reducers: {
         setLoading: (state: HandHistorySliceState, action: PayloadAction<loadingTypes>) => {
             state.loading = action.payload;
