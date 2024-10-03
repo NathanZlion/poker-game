@@ -16,7 +16,7 @@ export default function HandHistory(
     // Runs once when the component is mounted
     useEffect(() => {
         dispatch(fetchHandHistory());
-    });
+    }, []);
 
     return (
         <ScrollArea className={cn("", className) }>

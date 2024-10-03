@@ -38,7 +38,7 @@ export default function PlayLog(
                 gameHasEnded && (
                     <div>
                         <p className="font-bold block"> {`Hand #${handId} ended`} </p>
-                        <p> {`Final pot  was #${pot_amount}.`} </p>
+                        <p> {`Final pot  was ${pot_amount}.`} </p>
                     </div>
                 )
             }
