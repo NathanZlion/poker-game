@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { performAction } from "@/lib/feature/hand/handSlice";
+import { increaseRaiseSize, increaseBetSize, decreaseBetSize, decreaseRaiseSize } from "@/lib/feature/hand/handSlice";
 
 export default function Actions(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
@@ -12,8 +13,8 @@ export default function Actions(
     const {
         loading,
         betSize,
+        raiseSize,
         allowedActions,
-        raiseSize
     } = useAppSelector((state) => state.hand);
     const actionPending = loading === 'pending';
 
@@ -29,8 +30,8 @@ export default function Actions(
 
             <Button
                 variant={"outline"} className="bg-green-400"
-                disabled={actionPending || !allowedActions.includes("CHECK")}
                 onClick={() => { dispatch(performAction({ actionType: "CHECK" })) }}
+                disabled={actionPending || !allowedActions.includes("CHECK")}
             >
                 Check
             </Button>
@@ -45,7 +46,7 @@ export default function Actions(
 
             <Button
                 variant={"outline"} className="bg-orange-400"
-                onClick={() => { dispatch({ type: 'handSlice/decrementBetSize' }) }}
+                onClick={() => { dispatch(decreaseBetSize()) }}
                 disabled={actionPending || !allowedActions.includes("BET")}
             >
                 -
@@ -61,7 +62,7 @@ export default function Actions(
 
             <Button
                 variant={"outline"} className="bg-orange-400"
-                onClick={() => { dispatch({ type: 'handSlice/incrementBetSize' }) }}
+                onClick={() => { dispatch(increaseBetSize()) }}
                 disabled={actionPending || !allowedActions.includes("BET")}
             >
                 +
@@ -69,15 +70,15 @@ export default function Actions(
 
             <Button
                 variant={"outline"} className="bg-orange-400"
+                onClick={() => { dispatch(decreaseRaiseSize()) }}
                 disabled={actionPending || !allowedActions.includes("RAISE")}
-                onClick={() => { dispatch({ type: 'handSlice/decrementRaiseSize' }) }}
             >
                 -
             </Button>
 
             <Button
                 variant={"outline"} className="bg-orange-400"
-                onClick={() => { dispatch(performAction({ actionType: "RAISE", amount: betSize })) }}
+                onClick={() => { dispatch(performAction({ actionType: "RAISE", amount: raiseSize })) }}
                 disabled={actionPending || !allowedActions.includes("RAISE")}
             >
                 Raise {raiseSize}
@@ -86,6 +87,7 @@ export default function Actions(
 
             <Button
                 variant={"outline"} className="bg-orange-400"
+                onClick={() => { dispatch(increaseRaiseSize()) }}
                 disabled={actionPending || !allowedActions.includes("RAISE")}
             >
                 +
@@ -93,7 +95,8 @@ export default function Actions(
 
             <Button
                 variant={"outline"} className="bg-destructive"
-                disabled={actionPending || !allowedActions.includes("ALLIN")}
+                onClick={() => { dispatch(performAction({ actionType: "ALL_IN" })) }}
+                disabled={actionPending || !allowedActions.includes("ALL_IN")}
             >
                 Allin
             </Button>

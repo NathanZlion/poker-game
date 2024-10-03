@@ -8,7 +8,7 @@ import { ScrollArea } from "./ui/scroll-area";
 export default function PlayLog(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
-    const { handId, logs, loading, gameHasEnded, lastPotAmount } = useAppSelector(state => state.hand);
+    const { handId, logs, loading, gameHasEnded, pot_amount } = useAppSelector(state => state.hand);
     const _s = useAppSelector(state => state.hand);
 
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function PlayLog(
                 gameHasEnded && (
                     <div>
                         <p className="font-bold block"> {`Hand #${handId} ended`} </p>
-                        <p> {`Final pot  was #${lastPotAmount}.`} </p>
+                        <p> {`Final pot  was #${pot_amount}.`} </p>
                     </div>
                 )
             }

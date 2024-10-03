@@ -9,11 +9,12 @@ type HandSliceState = {
     loading: loadingTypes,
     allowedActions: string[],
     stack: number,
-    betSize: number,
     raiseSize: number,
-    lastPotAmount: number,
+    betSize: number,
+    pot_amount: number,
     gameHasEnded: boolean,
-    logs: string[]
+    logs: string[],
+    minimum_bet_or_raise_amount: number
 }
 
 interface actionPayload {
@@ -28,6 +29,7 @@ interface startHandResponse {
     logs: string[];
     game_has_ended: boolean;
     pot_amount: number;
+    minimum_bet_or_raise_amount: number;
 }
 
 interface performActionResponse {
@@ -36,37 +38,38 @@ interface performActionResponse {
     game_has_ended: boolean;
     allowed_actions: string[];
     pot_amount: number;
+    minimum_bet_or_raise_amount: number;
 }
 
-type actionSTypes = "FOLD" | "CHECK" | "CALL" | "BET" | "RAISE" | "ALLIN";
+type actionSTypes = "FOLD" | "CHECK" | "CALL" | "BET" | "RAISE" | "ALL_IN";
 
 const initialState : HandSliceState = {
     handId: null,
     loading: "idle",
     allowedActions: [],
     stack: 1_000_000,
-    betSize: 40,
     raiseSize: 40,
-    lastPotAmount: 0,
+    betSize: 20,
+    pot_amount: 0,
     gameHasEnded: false,
-    logs: [
-    ]
+    logs: [],
+    minimum_bet_or_raise_amount: 0
 };
 
 export const handSlice = createSlice({
     name: 'hand',
     initialState: initialState,
     reducers: {
-        increaseBetSize: (state, _) => {
-            state.betSize += 40;
+        increaseBetSize: (state) => {
+            state.betSize += 20;
         },
-        decreaseBetSize: (state, _) => {
-            state.betSize -= 40;
+        decreaseBetSize: (state) => {
+            state.betSize -= 20;
         },
-        increaseRaiseSize: (state, _) => {
+        increaseRaiseSize: (state) => {
             state.raiseSize += 40;
         },
-        decreaseRaiseSize: (state, _) => {
+        decreaseRaiseSize: (state) => {
             state.raiseSize -= 40;
         },
         setLoading: (state, action: PayloadAction<loadingTypes>) => {
@@ -76,26 +79,27 @@ export const handSlice = createSlice({
             state.stack = action.payload;
         },
         setState: (state, action: PayloadAction<HandSliceState>) => {
-            state.allowedActions=action.payload.allowedActions;
-            state.gameHasEnded=action.payload.gameHasEnded;
-            state.handId=action.payload.handId;
-            state.logs=action.payload.logs;
+            state.allowedActions = action.payload.allowedActions;
+            state.gameHasEnded = action.payload.gameHasEnded;
+            state.handId = action.payload.handId;
+            state.logs = action.payload.logs;
+            state.minimum_bet_or_raise_amount = action.payload.minimum_bet_or_raise_amount;
+            state.betSize = action.payload.minimum_bet_or_raise_amount;
+            state.raiseSize = action.payload.minimum_bet_or_raise_amount;
+            state.pot_amount = action.payload.pot_amount;
         },
-        reset: (state) => {
-            state = initialState;
-        }
     },
     extraReducers: (builder) => {
-        builder.addCase(startHand.fulfilled, (state, action) => {
+        builder.addCase(startHand.fulfilled, (state, _) => {
             state.loading = "success";
         }),
-            builder.addCase(startHand.rejected, (state, action) => {
+            builder.addCase(startHand.rejected, (state, _) => {
             state.loading = "failed";
         }),
-        builder.addCase(performAction.fulfilled, (state, action) => {
+        builder.addCase(performAction.fulfilled, (state, a) => {
             state.loading = "success";
         }),
-            builder.addCase(performAction.rejected, (state, action) => {
+            builder.addCase(performAction.rejected, (state, _) => {
             state.loading = "failed";
         })
     }
@@ -105,18 +109,20 @@ export const handSlice = createSlice({
 export const startHand = createAsyncThunk<void, number, { state: RootState }>(
     'hand/startHand',
     async (stack, { dispatch, getState }) => {
-        
-        // since we're starting a new game we should reset the handId
-        dispatch(handSlice.actions.reset());
-
         dispatch(handSlice.actions.setLoading("pending"));
-        const { data } = await apiService.post("/new_hand/", { stack });
+        const { status, data } = await apiService.post("/new_hand/", { stack });
+
+        if (status !== 200) {
+            dispatch(handSlice.actions.setLoading("failed"));
+        }
+
         const {
             id,
             allowed_actions,
             logs,
             game_has_ended,
-            pot_amount
+            pot_amount,
+            minimum_bet_or_raise_amount
         } = data as startHandResponse;
 
         const updatedState = {
@@ -126,8 +132,9 @@ export const startHand = createAsyncThunk<void, number, { state: RootState }>(
             allowedActions: allowed_actions,
             lastPotAmount: pot_amount,
             gameHasEnded: game_has_ended,
+            minimum_bet_or_raise_amount: minimum_bet_or_raise_amount
         };
-
+        
         dispatch(handSlice.actions.setState(updatedState));
         dispatch(handSlice.actions.setLoading("success"));
     }
@@ -155,14 +162,15 @@ export const performAction = createAsyncThunk<void, actionPayload, { state: Root
             return;
         }
 
-        const { logs, allowed_actions, game_has_ended, pot_amount } = data as performActionResponse;
+        const { logs, allowed_actions, game_has_ended, pot_amount, minimum_bet_or_raise_amount } = data as performActionResponse;
 
         const updatedState = {
             ...getState().hand,
             logs: logs,
             allowedActions: allowed_actions,
             gameHasEnded: game_has_ended,
-            lastPotAmount: pot_amount
+            pot_amount: pot_amount,
+            minimum_bet_or_raise_amount: minimum_bet_or_raise_amount
         }
 
         dispatch(handSlice.actions.setState(updatedState));
@@ -176,3 +184,5 @@ export const performAction = createAsyncThunk<void, actionPayload, { state: Root
     }
 );
 
+
+export const { increaseBetSize, decreaseBetSize, increaseRaiseSize, decreaseRaiseSize, setLoading, setStack } = handSlice.actions;

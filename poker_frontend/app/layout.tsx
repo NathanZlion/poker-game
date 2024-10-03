@@ -44,8 +44,6 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {/* <nav className="flex justify-end p-5 pe-10"> <ThemeToggle /> </nav> */}
-
             {children}
           </ThemeProvider>
         </Provider>
