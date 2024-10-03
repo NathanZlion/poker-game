@@ -40,7 +40,7 @@ class ActionResponse(BaseModel):
         logs: List[str], the logs of the actions that have been performed in the hand
         game_has_ended: bool, whether the game has ended or not
         pot_amount: int, the total pot amount in the hand
-
+        min_bet_or_completion: int, the minimum bet or completion amount
     """
     id: str = ""
     success: bool = False
@@ -49,3 +49,5 @@ class ActionResponse(BaseModel):
     logs: List[str]
     game_has_ended: bool = False
     pot_amount: int
+    minimum_bet_or_raise_amount: int
+

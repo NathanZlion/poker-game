@@ -35,6 +35,7 @@ class HandResponse(BaseModel):
     logs: List[str]
     game_has_ended: bool
     pot_amount: int
+    minimum_bet_or_raise_amount: int
 
 class GetHandRequest(BaseModel):
     pass

@@ -30,28 +30,6 @@ def create_hand(
     return hand_service.create_hand(hand_data)
 
 
-@hand_router.get(
-    "/hands/{hand_id}",
-    response_model=HandHistoryResponse,
-)
-def get_hand_by_id(
-    hand_id: str,
-    hand_service: HandService = Depends(get_hand_service),
-):
-    """Get's hand history, all hands that have ended."""
-
-    hand = hand_service.get_hand(hand_id=hand_id)
-
-    # hand with such id does not exist
-    if not hand:
-        raise HTTPException(status_code=404, detail="Hand not found.")
-
-    return HandResponse(  # type: ignore
-        # id=hand.id,
-        # has_ended=hand.has_ended,
-    )
-
-
 @hand_router.get("/hands", response_model=List[HandHistoryResponse])
 def get_hand_history(
     hand_service: HandService = Depends(get_hand_service),
@@ -60,10 +38,15 @@ def get_hand_history(
 
     hands: List[HandHistoryResponse] = hand_service.get_hand_history()
 
-    if hands:
+    if len(hands) > 0:
         return hands
 
-    raise HTTPException(status_code=404, detail="No hands found.")
+    raise HTTPException(
+        status_code=404,
+        detail={
+            "message": "No hands found.",
+        },
+    )
 
 
 @hand_router.post(
@@ -80,7 +63,6 @@ def perform_action(
 
     result = hand_service.perform_action(hand_id, action)
     if not result.success:
-        raise HTTPException(status_code=400, detail=result.message)
-        
+        raise HTTPException(status_code=400, detail=result.model_dump())
 
     return result

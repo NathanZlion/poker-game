@@ -1,5 +1,4 @@
 from typing import List, Optional
-from src.hand_package.domain.value_objects.action import ActionObject
 from src.hand_package.infrastructure.repository.hand_repository import HandRepository
 from src.hand_package.domain.entities.hand import Hand
 from src.hand_package.domain.value_objects.hand import CreateHand
@@ -25,7 +24,7 @@ class HandService:
         hand: Hand = self.poker_service.create_hand(create_hand_value_object)
         hand = self.hand_repository.create_hand(hand)
 
-        allowed_actions, logs, game_has_ended, total_pot_size = self.poker_service.analyse_hand(hand)
+        allowed_actions, logs, game_has_ended, total_pot_size, minimum_bet_or_raise_amount = self.poker_service.analyse_hand(hand)
 
         return HandResponse(
             id=hand.id,
@@ -34,13 +33,14 @@ class HandService:
             game_has_ended=game_has_ended,
             logs=logs,
             pot_amount=total_pot_size,
+            minimum_bet_or_raise_amount=minimum_bet_or_raise_amount,
         )
 
     def perform_action(self, hand_id: str, actionModel: ActionModel) -> ActionResponse:
         action: Action = Action(**actionModel.model_dump())
         hand = self.hand_repository.get_hand(hand_id)
 
-        # No such action
+        # No such hand
         if not hand:
             return ActionResponse(
                 id="-1",
@@ -50,10 +50,10 @@ class HandService:
                 allowed_actions=[],
                 game_has_ended=False,
                 pot_amount=-1,
+                minimum_bet_or_raise_amount=-1,
             )
 
         action_response, updated_hand = self.poker_service.perform_action_on_hand(action, hand)
-        _, _, _, _ = self.poker_service.analyse_hand(updated_hand)
 
         # action cannot be performed
         if not action_response.success:

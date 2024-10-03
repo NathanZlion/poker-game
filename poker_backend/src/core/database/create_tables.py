@@ -15,11 +15,10 @@ def create_tables():
     """
 
 
-    print("Creating Tables.......")
     connection = getDatabaseConnection()
     with connection.cursor() as cursor:
         cursor.execute(create_extension_uuid)
         cursor.execute(create_hand_table)
 
-    print("Tables created successfully.")
+    print("Tables creation compete")
     connection.commit()
