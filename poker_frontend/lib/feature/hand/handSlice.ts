@@ -18,7 +18,7 @@ type HandSliceState = {
 }
 
 interface actionPayload {
-    actionType: actionSTypes,
+    actionType: actionTypes,
     amount?: number
 }
 
@@ -41,7 +41,7 @@ interface performActionResponse {
     minimum_bet_or_raise_amount: number;
 }
 
-type actionSTypes = "FOLD" | "CHECK" | "CALL" | "BET" | "RAISE" | "ALL_IN";
+export type actionTypes = "FOLD" | "CHECK" | "CALL" | "BET" | "RAISE" | "ALL_IN";
 
 const initialState : HandSliceState = {
     handId: null,
@@ -90,16 +90,16 @@ export const handSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(startHand.fulfilled, (state, _) => {
+        builder.addCase(startHand.fulfilled, (state) => {
             state.loading = "success";
         }),
-            builder.addCase(startHand.rejected, (state, _) => {
+            builder.addCase(startHand.rejected, (state) => {
             state.loading = "failed";
         }),
-        builder.addCase(performAction.fulfilled, (state, a) => {
+        builder.addCase(performAction.fulfilled, (state) => {
             state.loading = "success";
         }),
-            builder.addCase(performAction.rejected, (state, _) => {
+            builder.addCase(performAction.rejected, (state) => {
             state.loading = "failed";
         })
     }
@@ -155,7 +155,7 @@ export const performAction = createAsyncThunk<void, actionPayload, { state: Root
         const { data, status } = await apiService.post(`/hands/${handId}/actions`, {
             type: actionType,
             amount: amount
-        })
+        });
 
         if (status !== 200) {
             dispatch(handSlice.actions.setLoading("failed"));

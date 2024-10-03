@@ -12,10 +12,10 @@ export const apiService = {
     async get(path: string) {
         return axiosInstance.get(path);
     },
-    async post(path: string, data: any) {
+    async post<T>(path: string, data: T) {
         return axiosInstance.post(path, data);
     },
-    async put(path: string, data: any) {
+    async put<T>(path: string, data: T) {
         return axiosInstance.put(path, data);
     },
     async delete(path: string) {

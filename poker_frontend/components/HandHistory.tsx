@@ -11,11 +11,12 @@ export default function HandHistory(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
     const dispatch = useAppDispatch();
-    const { loading, value: handHistories } = useAppSelector((state) => state.history);
+    const { value: handHistories } = useAppSelector((state) => state.history);
 
+    // Runs once when the component is mounted
     useEffect(() => {
         dispatch(fetchHandHistory());
-    }, []);
+    });
 
     return (
         <ScrollArea className={cn("", className) }>

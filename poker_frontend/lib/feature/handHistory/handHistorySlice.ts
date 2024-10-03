@@ -39,10 +39,10 @@ export const handHistorySlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        builder.addCase(fetchHandHistory.fulfilled, (state: HandHistorySliceState, _) => {
+        builder.addCase(fetchHandHistory.fulfilled, (state: HandHistorySliceState) => {
             state.loading = "success";
         }),
-            builder.addCase(fetchHandHistory.rejected, (state: HandHistorySliceState, _) => {
+            builder.addCase(fetchHandHistory.rejected, (state: HandHistorySliceState) => {
                 state.loading = "failed";
             })
     }
