@@ -10,12 +10,15 @@ import { ScrollArea } from "@radix-ui/react-scroll-area";
 export default function HandHistory(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
-    const dispatch = useAppDispatch();
     const { value: handHistories } = useAppSelector((state) => state.history);
 
     // Runs once when the component is mounted
     useEffect(() => {
-        dispatch(fetchHandHistory());
+        const _fetch = async () => {
+            const dispatch = useAppDispatch();
+            dispatch(fetchHandHistory());
+        }
+        _fetch();
     }, []);
 
     return (
