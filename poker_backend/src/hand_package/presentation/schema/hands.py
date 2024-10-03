@@ -1,7 +1,7 @@
 # from dataclasses import field
 from typing import List
 from pydantic import BaseModel
-from config.injection import get_game_settings
+from src.config.injection import get_game_settings
 from src.hand_package.presentation.schema.action import ActionType
 
 

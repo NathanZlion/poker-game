@@ -4,7 +4,7 @@ from src.core.database.create_tables import create_tables
 from src.core.database.database import getDatabaseConnection
 from src.models import Healthy
 from src.hand_package.presentation.routes.route import hand_router
-from config.settings import allowed_origins, version
+from src.config.settings import allowed_origins, version
 from contextlib import asynccontextmanager
 
 @asynccontextmanager

@@ -1,8 +1,8 @@
 from functools import cache
 import psycopg2
 from psycopg2.extensions import connection
-from config.database import DatabaseSettings
-from config.injection import get_db_settings
+from src.config.database import DatabaseSettings
+from src.config.injection import get_db_settings
 
 
 
