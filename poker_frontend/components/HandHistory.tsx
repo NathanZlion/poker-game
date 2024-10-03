@@ -11,14 +11,11 @@ export default function HandHistory(
     { className }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
 
     const { value: handHistories } = useAppSelector((state) => state.history);
+    const dispatch = useAppDispatch();
 
     // Runs once when the component is mounted
     useEffect(() => {
-        const _fetch = async () => {
-            const dispatch = useAppDispatch();
-            dispatch(fetchHandHistory());
-        }
-        _fetch();
+        dispatch(fetchHandHistory());
     }, []);
 
     return (
