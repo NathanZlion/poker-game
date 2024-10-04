@@ -6,7 +6,7 @@ export class MainPage {
     constructor(private page: Page) { }
 
     async goto() {
-        await this.page.goto('http://127.0.0.1:3000');
+        await this.page.goto('/');
     }
 
     async startGame() {
