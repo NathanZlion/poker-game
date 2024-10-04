@@ -37,8 +37,10 @@ class HandResponse(BaseModel):
     pot_amount: int
     minimum_bet_or_raise_amount: int
 
+
 class GetHandRequest(BaseModel):
     pass
+
 
 class HandHistoryResponse(BaseModel):
     """HandHistoryResponse schema
@@ -54,11 +56,11 @@ class HandHistoryResponse(BaseModel):
         winnings: dict[str, int], the winnings of the players
     """
 
-    id : str
-    stack : int
-    dealer : str
-    small_blind_player : str
-    big_blind_player : str
+    id: str
+    stack: int
+    dealer: str
+    small_blind_player: str
+    big_blind_player: str
     actions: str
     hands: dict[str, str]
-    winnings : dict[str, int]
+    winnings: dict[str, int]

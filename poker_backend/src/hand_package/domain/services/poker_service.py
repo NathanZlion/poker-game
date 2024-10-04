@@ -11,9 +11,7 @@ from copy import deepcopy
 
 
 class PokerService:
-
     def create_hand(self, create_hand: CreateHand) -> Hand:
-
         create_hand.stack_size
 
         state: State = NoLimitTexasHoldem.create_state(
@@ -28,14 +26,16 @@ class PokerService:
                 Automation.CHIPS_PULLING,
                 Automation.HOLE_CARDS_SHOWING_OR_MUCKING,
                 Automation.HAND_KILLING,
-            ), # type: ignore
+            ),  # type: ignore
             ante_trimming_status=True,
             raw_antes={-1: 0},
             raw_blinds_or_straddles=(20, 40),
             min_bet=20,
-            raw_starting_stacks=[create_hand.stack_size for _ in range(create_hand.player_count)],
+            raw_starting_stacks=[
+                create_hand.stack_size for _ in range(create_hand.player_count)
+            ],
             mode=Mode.CASH_GAME,
-            player_count=create_hand.player_count
+            player_count=create_hand.player_count,
         )
 
         # call the repository to create a hand
@@ -44,11 +44,19 @@ class PokerService:
             hand_history=self.__dump_hand_history(state),
         )
 
-    def perform_action_on_hand(self, action: Action, hand: Hand) -> Tuple[ActionResponse, Hand]:
-        allowed_actions, logs, game_has_ended, total_pot_size, minimum_bet_or_raise_amount = self.analyse_hand(hand)
+    def perform_action_on_hand(
+        self, action: Action, hand: Hand
+    ) -> Tuple[ActionResponse, Hand]:
+        (
+            allowed_actions,
+            logs,
+            game_has_ended,
+            total_pot_size,
+            minimum_bet_or_raise_amount,
+        ) = self.analyse_hand(hand)
         hand_history = self.__load_hand_history(hand)
 
-        final_state = [state for state, _ in hand_history.state_actions ][-1]
+        final_state = [state for state, _ in hand_history.state_actions][-1]
 
         if game_has_ended:
             return (
@@ -59,7 +67,7 @@ class PokerService:
                     game_has_ended=game_has_ended,
                     logs=logs,
                     pot_amount=total_pot_size,
-                    minimum_bet_or_raise_amount= minimum_bet_or_raise_amount
+                    minimum_bet_or_raise_amount=minimum_bet_or_raise_amount,
                 ),
                 hand,
             )
@@ -86,7 +94,7 @@ class PokerService:
             case ActionType.FOLD:
                 final_state.fold()
 
-            case ActionType.CHECK :
+            case ActionType.CHECK:
                 final_state.check_or_call()
 
             case ActionType.CALL:
@@ -121,7 +129,8 @@ class PokerService:
                             game_has_ended=game_has_ended,
                             logs=logs,
                             pot_amount=total_pot_size,
-                            minimum_bet_or_raise_amount=final_state.min_completion_betting_or_raising_to_amount or -1,
+                            minimum_bet_or_raise_amount=final_state.min_completion_betting_or_raising_to_amount
+                            or -1,
                         ),
                         hand,
                     )
@@ -129,7 +138,9 @@ class PokerService:
                 final_state.complete_bet_or_raise_to(action.amount)
 
             case ActionType.ALLIN:
-                final_state.complete_bet_or_raise_to(final_state.stacks[final_state.actor_index or 0])
+                final_state.complete_bet_or_raise_to(
+                    final_state.stacks[final_state.actor_index or 0]
+                )
 
         updated_hand_history = self.__dump_hand_history(final_state)
         hand.hand_history = updated_hand_history
@@ -148,18 +159,30 @@ class PokerService:
 
         updated_hand_history = self.__dump_hand_history(final_state)
         hand.hand_history = updated_hand_history
-        allowed_actions, logs, game_has_ended, total_pot_size, minimum_bet_or_raise_amount = self.analyse_hand(hand)
+        (
+            allowed_actions,
+            logs,
+            game_has_ended,
+            total_pot_size,
+            minimum_bet_or_raise_amount,
+        ) = self.analyse_hand(hand)
 
         hand.game_has_ended = game_has_ended
 
         hand_history = self.__load_hand_history(hand)
-        final_state = [state for state, _ in hand_history.state_actions ][-1]
+        final_state = [state for state, _ in hand_history.state_actions][-1]
         if final_state.can_deal_board():
             final_state.deal_board()
 
         updated_hand_history = self.__dump_hand_history(final_state)
         hand.hand_history = updated_hand_history
-        allowed_actions, logs, game_has_ended, total_pot_size, minimum_bet_or_raise_amount = self.analyse_hand(hand)
+        (
+            allowed_actions,
+            logs,
+            game_has_ended,
+            total_pot_size,
+            minimum_bet_or_raise_amount,
+        ) = self.analyse_hand(hand)
         hand.game_has_ended = game_has_ended
 
         return (
@@ -171,12 +194,15 @@ class PokerService:
                 game_has_ended=game_has_ended,
                 logs=logs,
                 pot_amount=total_pot_size,
-                minimum_bet_or_raise_amount=final_state.min_completion_betting_or_raising_to_amount or -1,
+                minimum_bet_or_raise_amount=final_state.min_completion_betting_or_raising_to_amount
+                or -1,
             ),
             hand,
         )
 
-    def analyse_hand(self, hand: Hand) -> Tuple[List[ActionType], List[str], bool, int, int]:
+    def analyse_hand(
+        self, hand: Hand
+    ) -> Tuple[List[ActionType], List[str], bool, int, int]:
         """Analyse Hand
 
         returns : allowed_actions, logs, game_has_ended, total_pot_size, minimum_bet
@@ -184,14 +210,14 @@ class PokerService:
         logs = []
         hand_history = self.__load_hand_history(hand)
         players = hand_history.players
-        states : List[State] = []
+        states: List[State] = []
 
         for state in hand_history:
             states.append(deepcopy(state))  # Deep copy of each state
 
         actions = hand_history.actions
         # [action for _, action in hand_history.state_actions]
-        player_count = len(players) # type: ignore
+        player_count = len(players)  # type: ignore
 
         # log of the hole dealing
         state_after_hole_dealing = states[player_count]
@@ -219,7 +245,6 @@ class PokerService:
         logs.append("---")
 
         for index in range(player_count, len(actions)):
-
             action_log = actions[index]
             state = states[index]
             action_log = action_log.split(" ")
@@ -231,8 +256,7 @@ class PokerService:
                 player, _ = action_log
                 player_index = int(player[1]) - 1
                 player = players[player_index]  # type: ignore
-                if action == "cc": 
-
+                if action == "cc":
                     if self.__bets_placed_before(state):
                         logs.append(f"{player} calls")
                     else:
@@ -249,7 +273,7 @@ class PokerService:
                     logs.append(f"{dealing_round_name} Dealt: {cards}")
 
                 # complete bet or raise : example - < p1 cbr 8000 >
-                elif action == "cbr":  
+                elif action == "cbr":
                     player, _, amount = action_log
                     player_index = int(player[1]) - 1
                     player = players[player_index]  # type: ignore
@@ -260,11 +284,13 @@ class PokerService:
                         logs.append(f"{player} bets {amount} chips")
 
                 elif action == "sm":  # show or muck
-                    pass    # not part of log for now
+                    pass  # not part of log for now
 
         final_state = states[-1]
         allowed_actions = self.__get_allowed_actions(final_state)
-        game_has_end = (not final_state.can_deal_board()) and final_state.actor_index is None
+        game_has_end = (
+            not final_state.can_deal_board()
+        ) and final_state.actor_index is None
 
         return (
             allowed_actions,
@@ -287,14 +313,12 @@ class PokerService:
         return allowed_actions
 
     def get_formatted_hand_history(self, hand: Hand) -> HandHistoryResponse:
-        hand_history : HandHistory= self.__load_hand_history(hand)
+        hand_history: HandHistory = self.__load_hand_history(hand)
         stack = hand_history.starting_stacks[0]
         players = hand_history.players
         states = [state for state, _ in hand_history.state_actions]
-        player_count = len(players) # type: ignore
+        player_count = len(players)  # type: ignore
         actions = hand_history.actions
-
-
 
         dealer_index = -1
         dealer_player = players[dealer_index]  # type: ignore
@@ -309,8 +333,8 @@ class PokerService:
         }
 
         winnings = {
-            f"Player {index + 1}" : winning
-        for index, winning in enumerate(final_state.payoffs)
+            f"Player {index + 1}": winning
+            for index, winning in enumerate(final_state.payoffs)
         }
 
         actions = self.__get_formatted_hh_actions(hand)
@@ -323,15 +347,15 @@ class PokerService:
             small_blind_player=small_blind_dealer,
             dealer=dealer_player,
             hands=hands,
-            winnings=winnings
+            winnings=winnings,
         )
 
     def __get_formatted_hh_actions(self, hand: Hand) -> str:
-        hand_history : HandHistory= self.__load_hand_history(hand)
+        hand_history: HandHistory = self.__load_hand_history(hand)
         players = hand_history.players
         states = [state for state, _ in hand_history.state_actions]
         actions = hand_history.actions
-        player_count = len(players) # type: ignore
+        player_count = len(players)  # type: ignore
 
         logs = [[]]
 
@@ -348,7 +372,7 @@ class PokerService:
                 _, action = action_log
 
                 # check or call
-                if action == "cc": 
+                if action == "cc":
                     logs[-1].append("c" if self.__bets_placed_before(state) else "x")
                 # fold
                 elif action == "f":
@@ -364,7 +388,7 @@ class PokerService:
                     logs.append([])
 
                 # complete bet or raise : example - < p1 cbr 2000 >
-                elif action == "cbr":  
+                elif action == "cbr":
                     _, _, amount = action_log
 
                     if self.__bets_placed_before(state):
@@ -384,8 +408,9 @@ class PokerService:
         # at least one non zero bet
         return sum(state.bets) > 0
 
-    def __can_perform_action(self, action: ActionType, state: State) -> Tuple[bool, str]:
-
+    def __can_perform_action(
+        self, action: ActionType, state: State
+    ) -> Tuple[bool, str]:
         if state.actor_index is None:
             return False, "Action not allowed. No active player."
 
@@ -409,7 +434,10 @@ class PokerService:
                 # to bet there should be no bets placed before
                 if not self.__bets_placed_before(state):
                     return True, "Action Allowed."
-                return False, "Cannot bet. A bet has been placed before. You can only raise or call."
+                return (
+                    False,
+                    "Cannot bet. A bet has been placed before. You can only raise or call.",
+                )
 
             case ActionType.RAISE:
                 # to raise there should be a bet placed before
@@ -422,12 +450,15 @@ class PokerService:
                 if list(state.stacks)[state.actor_index] > 0:
                     return True, "Action Allowed."
 
-                return False, "Cannot go all in. Insufficient chips. You have run out of chips."
+                return (
+                    False,
+                    "Cannot go all in. Insufficient chips. You have run out of chips.",
+                )
 
         return False, "Action not allowed. Unknown action type."
 
     def __dump_hand_history(self, state: State) -> str:
-        game : NoLimitTexasHoldem = NoLimitTexasHoldem(
+        game: NoLimitTexasHoldem = NoLimitTexasHoldem(
             automations=(
                 Automation.HOLE_CARDS_SHOWING_OR_MUCKING,
                 Automation.BOARD_DEALING,
@@ -438,20 +469,20 @@ class PokerService:
                 Automation.CHIPS_PUSHING,
                 Automation.CHIPS_PULLING,
                 Automation.HAND_KILLING,
-                Automation.CARD_BURNING
-            ),  #type: ignore
+                Automation.CARD_BURNING,
+            ),  # type: ignore
             ante_trimming_status=True,
             raw_antes={-1: 0},
             raw_blinds_or_straddles=(20, 40),
             min_bet=20,
-            mode=Mode.CASH_GAME
+            mode=Mode.CASH_GAME,
         )
 
         hand_history = HandHistory.from_game_state(game, state)
         hand_history.players = [f"Player {i+1}" for i in range(state.player_count)]
         buffer = io.BytesIO()
         hand_history.dump(buffer)
-        game_str = buffer.getvalue().decode('utf-8')
+        game_str = buffer.getvalue().decode("utf-8")
 
         return game_str
 

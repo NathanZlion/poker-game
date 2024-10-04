@@ -4,12 +4,10 @@ from src.hand_package.domain.entities.hand import Hand
 
 
 class HandRepository:
-
     def __init__(self, db_connection: connection):
         self.db_Connection = db_connection
 
     def create_hand(self, hand: Hand) -> Hand:
-
         with self.db_Connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -19,10 +17,7 @@ class HandRepository:
                     )
                     VALUES (%s, %s) RETURNING id;
                 """,
-                (
-                    hand.game_has_ended,
-                    hand.hand_history
-                ),
+                (hand.game_has_ended, hand.hand_history),
             )
 
             self.db_Connection.commit()
@@ -65,7 +60,7 @@ class HandRepository:
                         WHERE game_has_ended = %s
                         ORDER BY updated_at DESC;
                     """,
-                    (hand_status,), # type: ignore
+                    (hand_status,),  # type: ignore
                 )
             else:
                 cursor.execute(

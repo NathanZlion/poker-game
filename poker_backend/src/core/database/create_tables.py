@@ -16,7 +16,6 @@ def create_tables():
         );
     """
 
-
     connection = getDatabaseConnection()
     with connection.cursor() as cursor:
         cursor.execute(create_extension_uuid)

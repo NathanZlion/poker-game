@@ -1,8 +1,15 @@
 from typing import List, Optional
 from fastapi.testclient import TestClient
 from src.hand_package.domain.entities.hand import Hand
-from src.hand_package.presentation.schema.action import ActionModel, ActionResponse, ActionType
-from src.hand_package.presentation.schema.hands import CreateHandModel, HandHistoryResponse
+from src.hand_package.presentation.schema.action import (
+    ActionModel,
+    ActionResponse,
+    ActionType,
+)
+from src.hand_package.presentation.schema.hands import (
+    CreateHandModel,
+    HandHistoryResponse,
+)
 from src.injection import get_hand_service
 from src.main import app
 
@@ -52,8 +59,8 @@ class MockHandService:
             "minimum_bet_or_raise_amount": 10,
         }
 
-    def get_hand_history( self, _: Optional[bool] = True) -> list[HandHistoryResponse]:
-        hands : List[Hand] = []
+    def get_hand_history(self, _: Optional[bool] = True) -> list[HandHistoryResponse]:
+        hands: List[Hand] = []
         handhistories: List[HandHistoryResponse] = [
             HandHistoryResponse(
                 id=a["id"],
@@ -73,6 +80,7 @@ class MockHandService:
 
 def override_get_hand_service():
     return MockHandService()
+
 
 # override the get_hand_service dependency
 app.dependency_overrides[get_hand_service] = override_get_hand_service
@@ -112,7 +120,7 @@ def test_get_hand_history_success():
 
 
 class MockHandServiceEmptyHandHistory:
-    def get_hand_history( self, _: Optional[bool] = True) -> list[HandHistoryResponse]:
+    def get_hand_history(self, _: Optional[bool] = True) -> list[HandHistoryResponse]:
         return []
 
 
@@ -121,12 +129,17 @@ def override_get_hand_service_empty_hand_history():
 
 
 def test_get_hand_history_failure():
-    app.dependency_overrides[get_hand_service] = override_get_hand_service_empty_hand_history
+    app.dependency_overrides[get_hand_service] = (
+        override_get_hand_service_empty_hand_history
+    )
     response = testing_client.get("/api/v1/hands")
     assert response.status_code == 404
 
+
 class MockHandServicePerformActionSuccess:
-    def perform_action(self, _hand_id: str, _actionModel: ActionModel) -> ActionResponse:
+    def perform_action(
+        self, _hand_id: str, _actionModel: ActionModel
+    ) -> ActionResponse:
         return ActionResponse(
             id="1",
             success=True,
@@ -142,12 +155,17 @@ class MockHandServicePerformActionSuccess:
 def override_get_hand_service_perform_action_success():
     return MockHandServicePerformActionSuccess()
 
+
 def test_perform_action_success():
     """Test the perform action route, successfull action"""
-    app.dependency_overrides[get_hand_service] = override_get_hand_service_perform_action_success
+    app.dependency_overrides[get_hand_service] = (
+        override_get_hand_service_perform_action_success
+    )
     response = testing_client.post(
         "/api/v1/hands/1/actions",
-        json={"type": "FOLD", },
+        json={
+            "type": "FOLD",
+        },
     )
 
     assert response.status_code == 200
@@ -164,7 +182,9 @@ def test_perform_action_success():
 
 
 class MockHandServicePerformActionHandNotFound:
-    def perform_action(self, _hand_id: str, _actionModel: ActionModel) -> ActionResponse:
+    def perform_action(
+        self, _hand_id: str, _actionModel: ActionModel
+    ) -> ActionResponse:
         del _hand_id
         del _actionModel
 
@@ -186,10 +206,14 @@ def override_get_hand_service_perform_action_hand_not_found():
 
 def test_perform_action_fail_hand_not_found():
     """Test the perform action route, hand not found"""
-    app.dependency_overrides[get_hand_service] = override_get_hand_service_perform_action_hand_not_found    
+    app.dependency_overrides[get_hand_service] = (
+        override_get_hand_service_perform_action_hand_not_found
+    )
     response = testing_client.post(
         "/api/v1/hands/1/actions",
-        json={"type": "FOLD", },
+        json={
+            "type": "FOLD",
+        },
     )
 
     assert response.status_code == 400
@@ -200,6 +224,8 @@ def test_performance_action_fail_invalid_entity():
     """Test the perform action route, invalid action"""
     response = testing_client.post(
         "/api/v1/hands/1/actions",
-        json={"type": "INVALID_ACTION_TYPE", },
+        json={
+            "type": "INVALID_ACTION_TYPE",
+        },
     )
     assert response.status_code == 422

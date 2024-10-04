@@ -5,7 +5,6 @@ from src.config.database import DatabaseSettings
 from src.config.injection import get_db_settings
 
 
-
 @cache
 def getDatabaseConnection() -> connection:
     """

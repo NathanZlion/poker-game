@@ -7,6 +7,7 @@ from src.hand_package.presentation.routes.route import hand_router
 from src.config.settings import allowed_origins, version
 from contextlib import asynccontextmanager
 
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     create_tables()
@@ -15,6 +16,7 @@ async def lifespan(_: FastAPI):
     if conn:
         conn.close()
         print("--> Database connection closed on app shutdown.")
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -37,4 +39,3 @@ app.include_router(
     hand_router,
     prefix=f"/api/v{version}",
 )
-

@@ -10,16 +10,17 @@ from src.core.database.database import getDatabaseConnection
 from src.hand_package.infrastructure.repository.hand_repository import HandRepository
 
 
-
 @cache
 def get_poker_service() -> PokerService:
     return PokerService()
+
 
 @cache
 def get_hand_repository(
     db_connection: connection = Depends(getDatabaseConnection),
 ) -> HandRepository:
     return HandRepository(db_connection=db_connection)
+
 
 @cache
 def get_hand_service(

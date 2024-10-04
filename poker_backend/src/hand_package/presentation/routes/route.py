@@ -22,7 +22,7 @@ def create_hand(
     hand_data: CreateHandModel,
     hand_service: HandService = Depends(get_hand_service),
 ):
-    """Create a new hand, and start the game. 
+    """Create a new hand, and start the game.
 
     Returns a HandResponse
     """

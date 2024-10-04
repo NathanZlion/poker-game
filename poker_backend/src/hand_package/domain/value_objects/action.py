@@ -1,15 +1,17 @@
 from dataclasses import dataclass
+
 # from enum import Enum
 from src.hand_package.presentation.schema.action import ActionType
 
 # @dataclass(frozen=True)
 # class ActionType(str, Enum):
 #     FOLD = "FOLD"
-#     CHECK = "CHECK" 
+#     CHECK = "CHECK"
 #     CALL = "CALL"
 #     BET = "BET"
 #     RAISE = "RAISE"
 #     ALLIN = "ALL_IN"
+
 
 @dataclass(frozen=True)
 class ActionObject:

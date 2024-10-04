@@ -24,9 +24,9 @@ class ActionType(str, Enum):
 
 
 class ActionModel(BaseModel):
-    type : ActionType
-    amount : int = 0
-    description : str = "Action to perform."
+    type: ActionType
+    amount: int = 0
+    description: str = "Action to perform."
 
 
 class ActionResponse(BaseModel):
@@ -42,6 +42,7 @@ class ActionResponse(BaseModel):
         pot_amount: int, the total pot amount in the hand
         min_bet_or_completion: int, the minimum bet or completion amount
     """
+
     id: str = ""
     success: bool = False
     message: str = ""
@@ -50,4 +51,3 @@ class ActionResponse(BaseModel):
     game_has_ended: bool = False
     pot_amount: int
     minimum_bet_or_raise_amount: int
-
