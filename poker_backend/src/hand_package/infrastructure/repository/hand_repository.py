@@ -62,7 +62,8 @@ class HandRepository:
                 cursor.execute(
                     """
                         SELECT * FROM hands
-                        WHERE game_has_ended = %s;
+                        WHERE game_has_ended = %s
+                        ORDER BY updated_at DESC;
                     """,
                     (hand_status,), # type: ignore
                 )
@@ -86,7 +87,8 @@ class HandRepository:
                     """
                         UPDATE hands
                         SET game_has_ended = %s,
-                            hand_history = %s
+                            hand_history = %s,
+                            updated_at = CURRENT_TIMESTAMP
                         WHERE id = %s;
                     """,
                     (
@@ -97,5 +99,5 @@ class HandRepository:
                 )
             self.db_Connection.commit()
             return hand
-        except:
-            raise ValueError("Hand was not updated.")
+        except Exception as e:
+            raise ValueError(f"Hand was not updated. {e}")

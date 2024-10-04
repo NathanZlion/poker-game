@@ -10,7 +10,9 @@ def create_tables():
         CREATE TABLE IF NOT EXISTS hands (
             id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             game_has_ended  BOOLEAN NOT NULL DEFAULT FALSE,
-            hand_history TEXT NOT NULL
+            hand_history TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     """
 
