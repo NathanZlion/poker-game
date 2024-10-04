@@ -5,6 +5,7 @@ description = "Backend for poker game"
 authors = ["Nathnael Dereje <nathandere1357@gmail.com>"]
 readme = "README.md"
 
+
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "0.111.0"
@@ -15,13 +16,37 @@ pokerkit = "^0.5.4"
 psycopg2-binary = "^2.9.9"
 pydantic-settings = "^2.5.2"
 pytest = "^8.3.3"
+isort = "^5.13.2"
+
 
 [tool.poetry.group.dev.dependencies]
 httpx = "0.27.0"
 mypy = "1.10.0"
 ruff = "0.4.8"
+flake8 = "^7.1.1"
+pylint = "^3.3.1"
+black = "^24.8.0"
+autopep8 = "^2.3.1"
+
+
+[tool.autopep8]
+max_line_length = 79
+ignore = "E501,W6"  # or ["E501", "W6"]
+in-place = true
+recursive = true
+aggressive = 3
+
+
+
+[tool.isort]
+profile = 'black'
+py_version=311
+extend_skip = ["./.venv/"]
+line_length=79
+
 
 [build-system]
 requires = ["poetry-core"]
+
 
 build-backend = "poetry.core.masonry.api"
