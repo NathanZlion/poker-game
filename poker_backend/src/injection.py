@@ -1,13 +1,14 @@
 from functools import cache
+
 from fastapi import Depends
 from psycopg2.extensions import connection
-from src.hand_package.domain.services.poker_service import PokerService
-from src.hand_package.infrastructure.repository.hand_repository import HandRepository
-from src.hand_package.domain.services.hand_service import HandService
-from src.hand_package.domain.services.hand_service import HandService
-from src.hand_package.domain.services.poker_service import PokerService
+
 from src.core.database.database import getDatabaseConnection
-from src.hand_package.infrastructure.repository.hand_repository import HandRepository
+from src.hand_package.domain.services.hand_service import HandService
+from src.hand_package.domain.services.poker_service import PokerService
+from src.hand_package.infrastructure.repository.hand_repository import (
+    HandRepository,
+)
 
 
 @cache

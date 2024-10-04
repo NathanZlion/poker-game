@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 from src.config.injection import get_game_settings
 
 

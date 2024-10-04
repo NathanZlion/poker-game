@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from psycopg2.extensions import connection
+
 from src.hand_package.domain.entities.hand import Hand
 
 

@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from fastapi.testclient import TestClient
+
 from src.hand_package.domain.entities.hand import Hand
 from src.hand_package.presentation.schema.action import (
     ActionModel,
@@ -13,9 +15,6 @@ from src.hand_package.presentation.schema.hands import (
 from src.injection import get_hand_service
 from src.main import app
 
-# import sys
-# import os
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 
 testing_client = TestClient(app)
 
@@ -59,8 +58,10 @@ class MockHandService:
             "minimum_bet_or_raise_amount": 10,
         }
 
-    def get_hand_history(self, _: Optional[bool] = True) -> list[HandHistoryResponse]:
-        hands: List[Hand] = []
+    def get_hand_history(
+        self, _: Optional[bool] = True
+    ) -> list[HandHistoryResponse]:
+        _: List[Hand] = []
         handhistories: List[HandHistoryResponse] = [
             HandHistoryResponse(
                 id=a["id"],
@@ -120,7 +121,9 @@ def test_get_hand_history_success():
 
 
 class MockHandServiceEmptyHandHistory:
-    def get_hand_history(self, _: Optional[bool] = True) -> list[HandHistoryResponse]:
+    def get_hand_history(
+        self, _: Optional[bool] = True
+    ) -> list[HandHistoryResponse]:
         return []
 
 
@@ -138,8 +141,11 @@ def test_get_hand_history_failure():
 
 class MockHandServicePerformActionSuccess:
     def perform_action(
-        self, _hand_id: str, _actionModel: ActionModel
+        self, _handId: str, _actionModel: ActionModel
     ) -> ActionResponse:
+        del _handId
+        del _actionModel
+
         return ActionResponse(
             id="1",
             success=True,
@@ -183,9 +189,9 @@ def test_perform_action_success():
 
 class MockHandServicePerformActionHandNotFound:
     def perform_action(
-        self, _hand_id: str, _actionModel: ActionModel
+        self, _handId: str, _actionModel: ActionModel
     ) -> ActionResponse:
-        del _hand_id
+        del _handId
         del _actionModel
 
         return ActionResponse(
@@ -217,7 +223,10 @@ def test_perform_action_fail_hand_not_found():
     )
 
     assert response.status_code == 400
-    assert response.json()["detail"]["message"] == "Hand with such id doesn't exist."
+    assert (
+        response.json()["detail"]["message"]
+        == "Hand with such id doesn't exist."
+    )
 
 
 def test_performance_action_fail_invalid_entity():

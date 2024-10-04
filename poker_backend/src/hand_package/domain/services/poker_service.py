@@ -1,13 +1,14 @@
 import io
+from copy import deepcopy
 from typing import List, Tuple
+
+from pokerkit import Automation, HandHistory, Mode, NoLimitTexasHoldem, State
+
 from src.hand_package.domain.entities.hand import Hand
 from src.hand_package.domain.value_objects.action import Action, ActionType
 from src.hand_package.domain.value_objects.hand import CreateHand
-from pokerkit import Automation, NoLimitTexasHoldem, State, Mode, HandHistory
-
 from src.hand_package.presentation.schema.action import ActionResponse
 from src.hand_package.presentation.schema.hands import HandHistoryResponse
-from copy import deepcopy
 
 
 class PokerService:
@@ -73,7 +74,9 @@ class PokerService:
             )
 
         # check if the action can be performed
-        action_allowed, message = self.__can_perform_action(action.type, final_state)
+        action_allowed, message = self.__can_perform_action(
+            action.type, final_state
+        )
         if not action_allowed:
             return (
                 ActionResponse(
@@ -106,7 +109,10 @@ class PokerService:
                         ActionResponse(
                             id=hand.id,
                             success=False,
-                            message="Cannot Bet. Amount is less than the minimum bet amount.",
+                            message=(
+                                "Cannot Bet. Amount is less than the minimum"
+                                " bet amount."
+                            ),
                             allowed_actions=allowed_actions,
                             game_has_ended=game_has_ended,
                             logs=logs,
@@ -124,7 +130,10 @@ class PokerService:
                         ActionResponse(
                             id=hand.id,
                             success=False,
-                            message="Cannot raise. Amount is less than the minimum raise amount.",
+                            message=(
+                                "Cannot raise. Amount is less than the minimum"
+                                " raise amount."
+                            ),
                             allowed_actions=allowed_actions,
                             game_has_ended=game_has_ended,
                             logs=logs,
@@ -154,7 +163,10 @@ class PokerService:
         hand.game_has_ended = game_has_ended
 
         if game_has_ended:
-            while final_state.status and final_state.can_show_or_muck_hole_cards():
+            while (
+                final_state.status
+                and final_state.can_show_or_muck_hole_cards()
+            ):
                 final_state.show_or_muck_hole_cards()
 
         updated_hand_history = self.__dump_hand_history(final_state)
@@ -239,8 +251,12 @@ class PokerService:
 
         # announcing dealers and blind bets
         logs.append(f"{dealer} is the dealer.")
-        logs.append(f"{small_blind_dealer} posts small blind - {small_blind} chips")
-        logs.append(f"{big_blind_dealer} posts small blind - {big_blind} chips")
+        logs.append(
+            f"{small_blind_dealer} posts small blind - {small_blind} chips"
+        )
+        logs.append(
+            f"{big_blind_dealer} posts small blind - {big_blind} chips"
+        )
 
         logs.append("---")
 
@@ -373,7 +389,9 @@ class PokerService:
 
                 # check or call
                 if action == "cc":
-                    logs[-1].append("c" if self.__bets_placed_before(state) else "x")
+                    logs[-1].append(
+                        "c" if self.__bets_placed_before(state) else "x"
+                    )
                 # fold
                 elif action == "f":
                     logs[-1].append("f")
@@ -436,7 +454,10 @@ class PokerService:
                     return True, "Action Allowed."
                 return (
                     False,
-                    "Cannot bet. A bet has been placed before. You can only raise or call.",
+                    (
+                        "Cannot bet. A bet has been placed before. You can"
+                        " only raise or call."
+                    ),
                 )
 
             case ActionType.RAISE:
@@ -452,7 +473,10 @@ class PokerService:
 
                 return (
                     False,
-                    "Cannot go all in. Insufficient chips. You have run out of chips.",
+                    (
+                        "Cannot go all in. Insufficient chips. You have run"
+                        " out of chips."
+                    ),
                 )
 
         return False, "Action not allowed. Unknown action type."
@@ -479,7 +503,9 @@ class PokerService:
         )
 
         hand_history = HandHistory.from_game_state(game, state)
-        hand_history.players = [f"Player {i+1}" for i in range(state.player_count)]
+        hand_history.players = [
+            f"Player {i+1}" for i in range(state.player_count)
+        ]
         buffer = io.BytesIO()
         hand_history.dump(buffer)
         game_str = buffer.getvalue().decode("utf-8")
@@ -487,4 +513,6 @@ class PokerService:
         return game_str
 
     def __load_hand_history(self, hand: Hand) -> HandHistory:
-        return HandHistory.load(io.BytesIO(bytes(hand.hand_history, encoding="utf-8")))
+        return HandHistory.load(
+            io.BytesIO(bytes(hand.hand_history, encoding="utf-8"))
+        )

@@ -1,11 +1,13 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.config.settings import allowed_origins, version
 from src.core.database.create_tables import create_tables
 from src.core.database.database import getDatabaseConnection
-from src.models import Healthy
 from src.hand_package.presentation.routes.route import hand_router
-from src.config.settings import allowed_origins, version
-from contextlib import asynccontextmanager
+from src.models import Healthy
 
 
 @asynccontextmanager

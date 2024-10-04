@@ -1,14 +1,18 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
-from src.injection import get_hand_service
+
 from src.hand_package.domain.services.hand_service import HandService
-from src.hand_package.presentation.schema.action import ActionModel, ActionResponse
+from src.hand_package.presentation.schema.action import (
+    ActionModel,
+    ActionResponse,
+)
 from src.hand_package.presentation.schema.hands import (
     CreateHandModel,
     HandHistoryResponse,
     HandResponse,
 )
-
+from src.injection import get_hand_service
 
 hand_router = APIRouter()
 

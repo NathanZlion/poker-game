@@ -1,6 +1,7 @@
 from functools import cache
-from src.config.game import GameSettings
+
 from src.config.database import DatabaseSettings
+from src.config.game import GameSettings
 
 
 @cache
