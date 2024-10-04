@@ -18,7 +18,7 @@ export default function PlayLog(
     }, [_s.logs]);
 
     return (
-        <ScrollArea className={cn("", className)}>
+        <ScrollArea className={cn("", className)} id="play-logs-wrapper">
             {
                 logs.map((log, index) => {
                     return (
@@ -28,7 +28,7 @@ export default function PlayLog(
             }
 
             {/* loading new logs showed */}
-            {loading == "pending" ? <p className="block">...</p> : ""}
+            {loading == "pending" ? <p className="block" id="loading-indicator">...</p> : ""}
 
             {/* Before the game has started */}
             {loading == "idle" && logs.length === 0 && <p className="block">Game not started.</p>}
@@ -38,7 +38,7 @@ export default function PlayLog(
                 gameHasEnded && (
                     <div>
                         <p className="font-bold block"> {`Hand #${handId} ended`} </p>
-                        <p> {`Final pot  was ${pot_amount}.`} </p>
+                        <p className="font-bold block"> {`Final pot  was ${pot_amount}.`} </p>
                     </div>
                 )
             }

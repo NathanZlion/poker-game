@@ -19,16 +19,17 @@ export default function HandHistory(
     }, []);
 
     return (
-        <ScrollArea className={cn("", className) }>
+        <ScrollArea className={cn("h-full bg-blue-200/20", className) } id="hand-history-wrapper">
+            {handHistories.length == 0 && (<p className="p-10">No History Found</p>)}
             
             {/* the list of histories */}
             {
                 handHistories.map((handHistory, index) => {
                     return (
                         <div key={`hand_history_${index}`} className="my-3 bg-blue-200 dark:bg-blue-800 p-4">
-                            <p className="text-wrap"> Hand #{handHistory.id}</p>
-                            <p className="text-wrap"> Stack: {handHistory.stack}; Dealer: {handHistory.dealer}; Big Blind: {handHistory.big_blind_player}; Small Blind: {handHistory.small_blind_player} </p>
-                            <p className="text-wrap"> Hands : {
+                            <p className="text-wrap">Hand #{handHistory.id}</p>
+                            <p className="text-wrap">Stack: {handHistory.stack}; Dealer: {handHistory.dealer}; Big Blind: {handHistory.big_blind_player}; Small Blind: {handHistory.small_blind_player} </p>
+                            <p className="text-wrap">Hands : {
                                 Object.entries(handHistory.hands).map((
                                     [player, hand]
                                 ) => {
@@ -37,7 +38,7 @@ export default function HandHistory(
                             }
                             </p>
                             <p>Actions: {handHistory.actions}</p>
-                            <p> Winnings : {
+                            <p>Winnings : {
                                 Object.entries(handHistory.winnings).map((
                                     [player, winning]
                                 ) => {

@@ -1,6 +1,6 @@
 
 # dependencies
-/node_modules/
+node_modules/
 /.pnp
 .pnp.js
 .yarn/install-state.gz
@@ -30,3 +30,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
