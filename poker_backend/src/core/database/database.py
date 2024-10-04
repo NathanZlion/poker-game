@@ -22,27 +22,9 @@ def getDatabaseConnection() -> connection:
 
     try:
         settings: DatabaseSettings = get_db_settings()
-        try:
-            default_connection_string = (
-                f"postgresql://{settings.DB_USER}:"
-                f"{settings.DB_PASSWORD}@{settings.DB_HOST}:"
-                f"{settings.DB_PORT}/postgres"
-            )
-
-            connection = psycopg2.connect(default_connection_string)
-            connection.autocommit = True
-
-            with connection.cursor() as cursor:
-                cursor.execute(f"CREATE DATABASE {settings.DB_NAME};")
-
-            connection.close()
-        except Exception as e:
-            print(f"Database already exists {e}")
-
         db_connection_string = (
-            f"postgresql://{settings.DB_USER}:"
-            f"{settings.DB_PASSWORD}@{settings.DB_HOST}:"
-            f"{settings.DB_PORT}/{settings.DB_NAME}"
+            f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
+            f"@db:5432/{settings.POSTGRES_DB}"
         )
 
         connection = psycopg2.connect(db_connection_string)
