@@ -25,17 +25,23 @@ mypy = "1.10.0"
 ruff = "0.4.8"
 flake8 = "^7.1.1"
 pylint = "^3.3.1"
-black = "^24.8.0"
 autopep8 = "^2.3.1"
+flake8-pyproject = "^1.2.3"
 
 
 [tool.autopep8]
 max_line_length = 79
-ignore = "E501,W6"  # or ["E501", "W6"]
+experimental = true
 in-place = true
 recursive = true
 aggressive = 3
-exclude = ".venv"
+exclude = "./.venv/"
+
+
+[tool.flake8]
+max-line-length = 79
+extend-ignore = "E203"
+exclude = ["./.venv/"]
 
 
 [tool.isort]

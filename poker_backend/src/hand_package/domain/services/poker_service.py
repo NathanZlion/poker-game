@@ -104,6 +104,7 @@ class PokerService:
                 final_state.check_or_call()
 
             case ActionType.BET:
+                min_amt = minimum_bet_or_raise_amount
                 if not final_state.can_complete_bet_or_raise_to(action.amount):
                     return (
                         ActionResponse(
@@ -117,7 +118,7 @@ class PokerService:
                             game_has_ended=game_has_ended,
                             logs=logs,
                             pot_amount=total_pot_size,
-                            minimum_bet_or_raise_amount=minimum_bet_or_raise_amount,
+                            minimum_bet_or_raise_amount=min_amt
                         ),
                         hand,
                     )
@@ -126,6 +127,9 @@ class PokerService:
 
             case ActionType.RAISE:
                 if not final_state.can_complete_bet_or_raise_to(action.amount):
+                    min_amt = (
+                        final_state.min_completion_betting_or_raising_to_amount
+                    )
                     return (
                         ActionResponse(
                             id=hand.id,
@@ -138,8 +142,7 @@ class PokerService:
                             game_has_ended=game_has_ended,
                             logs=logs,
                             pot_amount=total_pot_size,
-                            minimum_bet_or_raise_amount=final_state.min_completion_betting_or_raising_to_amount
-                            or -1,
+                            minimum_bet_or_raise_amount=min_amt or -1,
                         ),
                         hand,
                     )
@@ -196,6 +199,7 @@ class PokerService:
             minimum_bet_or_raise_amount,
         ) = self.analyse_hand(hand)
         hand.game_has_ended = game_has_ended
+        min_amt = final_state.min_completion_betting_or_raising_to_amount
 
         return (
             ActionResponse(
@@ -206,8 +210,7 @@ class PokerService:
                 game_has_ended=game_has_ended,
                 logs=logs,
                 pot_amount=total_pot_size,
-                minimum_bet_or_raise_amount=final_state.min_completion_betting_or_raising_to_amount
-                or -1,
+                minimum_bet_or_raise_amount=min_amt or -1,
             ),
             hand,
         )
@@ -217,7 +220,8 @@ class PokerService:
     ) -> Tuple[List[ActionType], List[str], bool, int, int]:
         """Analyse Hand
 
-        returns : allowed_actions, logs, game_has_ended, total_pot_size, minimum_bet
+        returns : allowed_actions, logs, game_has_ended, total_pot_size,\
+        minimum_bet
         """
         logs = []
         hand_history = self.__load_hand_history(hand)
@@ -242,8 +246,10 @@ class PokerService:
 
         dealer_index = -1
         dealer = players[dealer_index]  # type: ignore
-        small_blind_dealer = players[(dealer_index + 1) % player_count]  # type: ignore
-        big_blind_dealer = players[(dealer_index + 2) % player_count]  # type: ignore
+        small_blind_dealer = players[(dealer_index + 1) %  # type: ignore
+                                     player_count]
+        big_blind_dealer = players[(dealer_index + 2) %  # type: ignore
+                                   player_count]
 
         blinds = sorted(state_after_hole_dealing.blinds_or_straddles)
         big_blind = blinds.pop()
@@ -338,8 +344,10 @@ class PokerService:
 
         dealer_index = -1
         dealer_player = players[dealer_index]  # type: ignore
-        small_blind_dealer = players[(dealer_index + 1) % player_count]  # type: ignore
-        big_blind_dealer = players[(dealer_index + 2) % player_count]  # type: ignore
+        small_blind_dealer = players[(dealer_index + 1) %  # type: ignore
+                                     player_count]
+        big_blind_dealer = players[(dealer_index + 2) %  # type: ignore
+                                   player_count]
 
         final_state = states[-1]
 

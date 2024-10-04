@@ -10,7 +10,8 @@ from src.config.injection import get_db_settings
 @cache
 def getDatabaseConnection() -> connection:
     """
-    Establishes a database connection using psycopg2 and yields it within a context manager.
+    Establishes a database connection using psycopg2 and yields
+    it within a context manager.
 
     Args:
         settings: Database settings object.
@@ -22,7 +23,12 @@ def getDatabaseConnection() -> connection:
     try:
         settings: DatabaseSettings = get_db_settings()
         try:
-            default_connection_string = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/postgres"
+            default_connection_string = (
+                f"postgresql://{settings.DB_USER}:"
+                f"{settings.DB_PASSWORD}@{settings.DB_HOST}:"
+                f"{settings.DB_PORT}/postgres"
+            )
+
             connection = psycopg2.connect(default_connection_string)
             connection.autocommit = True
 
@@ -31,10 +37,14 @@ def getDatabaseConnection() -> connection:
 
             connection.close()
         except Exception as e:
-            # Database with name already created
-            pass
+            print(f"Database already exists {e}")
 
-        db_connection_string = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}"
+        db_connection_string = (
+            f"postgresql://{settings.DB_USER}:"
+            f"{settings.DB_PASSWORD}@{settings.DB_HOST}:"
+            f"{settings.DB_PORT}/{settings.DB_NAME}"
+        )
+
         connection = psycopg2.connect(db_connection_string)
 
         return connection
