@@ -24,7 +24,7 @@ def getDatabaseConnection() -> connection:
         settings: DatabaseSettings = get_db_settings()
         db_connection_string = (
             f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}"
-            f"@db:5432/{settings.POSTGRES_DB}"
+            f"@db:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
         )
 
         connection = psycopg2.connect(db_connection_string)

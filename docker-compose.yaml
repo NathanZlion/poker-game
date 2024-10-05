@@ -7,11 +7,9 @@ services:
       dockerfile: Dockerfile
     image: poker_frontend
     ports:
-      - "3000:3000"  # Expose the frontend on port 3000
+      - "3000:3000"
     depends_on:
       - backend
-    # networks:
-    #   - poker-network
 
   backend:
     restart: always
@@ -20,13 +18,11 @@ services:
       dockerfile: Dockerfile
     image: poker_backend
     ports:
-      - "8000:8080"  # Expose the backend on port 8000
+      - "8000:8080"
     depends_on:
       - db
     env_file:
       - ./poker_backend/.env
-    # networks:
-    #   - poker-network
 
   db:
     image: postgres:16
@@ -34,12 +30,3 @@ services:
       - ~/apps/postgres:/var/lib/postgresql/data
     env_file:
       - ./poker_backend/.env
-    # networks:
-    #   - poker-network
-    # ports:
-    #   - "8001:5432"     # Expose the postgres on port 5431
-    
-
-# networks:
-#   poker-network:
-#     driver: bridge
