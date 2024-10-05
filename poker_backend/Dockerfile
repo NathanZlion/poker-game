@@ -16,7 +16,6 @@ WORKDIR /app
 ENV PATH="/app/.venv/bin:$PATH"
 
 COPY src src
-COPY .env .env
 
 EXPOSE 8080
 
