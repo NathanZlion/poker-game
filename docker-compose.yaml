@@ -25,14 +25,17 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgress
       - POSTGRES_DB=postgres
-      - POSTGRES_HOST=db  # Use db container as the host
+      - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
 
   db:
     image: postgres:16
     volumes:
-      - ~/apps/postgres:/var/lib/postgresql/data
+      - data-volume:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgress
       - POSTGRES_DB=postgres
+
+volumes:
+  data-volume:
